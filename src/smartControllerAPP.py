@@ -1,0 +1,2 @@
+class SmartControllerAPP(object):
+	pass

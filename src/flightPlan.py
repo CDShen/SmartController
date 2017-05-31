@@ -1,0 +1,6 @@
+class FlightPlan(object):
+	pass
+
+
+
+
