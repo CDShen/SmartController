@@ -1,44 +1,23 @@
-from enum import Enum
 
-class BaseData:
-	_fields = []
-	def __init__(self, *args):
-		if (len(args) != len(self._fields)):
-			raise TypeError('Expected {0} arguments'.format(len(self._fields))) 
-		for name, value in zip(self._fields, args):
-			setattr(self, name, value)
-
-class Point(BaseData):
-	_fields = ['x', 'y']
-
-
-
-###########地图基础数据
-##固定点
-class FixPointData(BaseData):
-	_fields = ['iID', 'strName', 'dX', 'dY','eConflictType']
-
-##滑行道
-class RoadData(BaseData):
-	_fields = ['iId', 'strName', 'vFixPnt']
-
-##机场
-class AirportData(BaseData):
-	_fields = ['iID', 'strName', 'vRoad']
-
+from baseDataDef import BaseData
 
 
 ###########航班数据
 ##飞行计划
-class FlightPlan(BaseData):
+class FlightPlanData(BaseData):
 	_fields = ['iID', 'strName', 'eFlightType','iTaxStartTime', 'iStartPosID', 'iEndPosID', 'bFinished']
 #航班时刻表集合
-class FlightSchedule(BaseData):
+class FlightScheduleData(BaseData):
 	_fields = ['vFlightPlan']
 
 
+# brief:起始-终点路径点集合，包含了固定点和其默认过点时间
+class PlanPathData(BaseData):
+	_fields = ['iStartPosID', 'iEndPosID', 'vPassPntTime']
+
+
 ##########路线结果
-class PassPntTime(BaseData):
+class PassPntTimeData(BaseData):
 	_fields = ['iFixPntID', 'iTime']
 
 
@@ -49,7 +28,7 @@ class PathOutDataSet(BaseData):
 	_fields = ['vPathOutData']
 
 #########冲突对
-class ConflictPair(BaseData):
+class ConflictDataPair(BaseData):
 	_fields = ['iFlightOneID', 'iFligtSecID', 'iConfFixID']
 
 
@@ -59,21 +38,21 @@ class ConflictPair(BaseData):
 
 ##########Q学习数据
 #状态S
-class QState(BaseData):
+class QStateData(BaseData):
 	_fields = ['iStartFixID', 'iEndFixID', 'iConFixID', 'eConFixType',\
 	'eConflictType' ,'eCurFlightType', 'eConFlightType','iPathFixSetID']
 
-class QAction(BaseData):
+class QActionData(BaseData):
 	_fields = ['eActionType']
 
-class QStateScore(BaseData):
+class QStateScoreData(BaseData):
 	_fields = ['qState', 'qAction', 'dScore']
 
 
-class QStateScoreSet(BaseData):
+class QStateScoreDataSet(BaseData):
 	_fields = ['vQStateScore']
 
-class QStatePathSet(BaseData):
+class QStatePathDataSet(BaseData):
 	_fields = ['iPathID', 'vFixPntID']
 
 
