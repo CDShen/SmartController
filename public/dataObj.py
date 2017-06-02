@@ -48,11 +48,11 @@ class PassPntData(BaseData):
 	_fields = ['iFixID', 'iRelaPassTime']
 
 #####滑行路径
-##iRoadID->滑行路径ID
+##iPathID->滑行路径ID  唯一
 ##iUseNum->使用次数
 ##vPassPntData->过点时间list, list顺序即滑行序号
 class PathData(BaseData):
-	_fields = ['iRoadID', 'iUseNum', 'vPassPntData']
+	_fields = ['iPathID', 'iUseNum', 'vPassPntData']
 
 #####起始/终点滑行路径集合
 ##iStartID->起始固定点ID
@@ -62,5 +62,44 @@ class HistoryPathData(BaseData):
 	_fields = ['iStartID','iEndID', 'vPathData']
 
 
+###################Q学习
+##########Q状态分数集合
+##vQStateActionData->Q状态分数list
+class QStateActionScoreDataSet(BaseData):
+	_fields = ['vQStateActionData']
 
+
+##########Q动作枚举
+class ENUM_QACTION_TYPE(Enum):
+	E_ACTION_STOP = 1 ##停止
+	E_ACTION_SLOWDOWN = 2 ##减速
+
+
+##########Q状态
+##iStartFixID->起始固定点ID
+##iEndFixID->结束固定点ID
+##iConflictFixID->冲突位置固定点ID
+##efixPntType->冲突固定点类型
+##eCurFlightType->当前航班类型
+##eConFlightType->冲突航班类型
+##eConflictType->冲突类型 1:对头冲突 2：交叉冲突 
+##iPathID->滑行道路的编号ID
+class QStateData(BaseData):
+	_fields = ['iStartFixID', 'iEndFixID','iConflictFixID', 'efixPntType','eCurFlightType','eConFlightType'\
+	,'eConflictType', 'iPathID']
+
+
+##########Q状态分数
+##iStartFixID->起始固定点ID
+##iEndFixID->结束固定点ID
+##iConflictFixID->冲突位置固定点ID
+##efixPntType->冲突固定点类型
+##eCurFlightType->当前航班类型
+##eConFlightType->冲突航班类型
+##eConflictType->冲突类型 1:对头冲突 2：交叉冲突 
+##iPathID->滑行道路的编号ID
+##eActionType->采取的动作
+##dScore->Q学习后的分数
+class QStateActionScoreData(BaseData):
+	_fields = ['QStateData', 'QActionData','dScore']
 

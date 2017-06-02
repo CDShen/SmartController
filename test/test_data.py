@@ -7,58 +7,34 @@ class BaseData:
 			setattr(self, name, value)
 
 class FixPnt(BaseData):
-	_fields = ['x',\
-	 'y']
+	_fields = ['x','y']
 
 
 class RoadData(BaseData):
 	_fields = ['name', 'vFixpnt']
 
-a = []
-a.append(FixPnt(1,2))
-a.append(FixPnt(2,3))
 
-c = a[1].y
-print (c)
-# b = RoadData('road1', a)
+vFixpnt = []
+i = 0
+i += 1
+vFixpnt.append(FixPnt(i,i))
+i += 1
+vFixpnt.append(FixPnt(i,i))
+i += 1
+vFixpnt.append(FixPnt(i,i))
+i += 1
+vFixpnt.append(FixPnt(i,i))
+i += 1
+vFixpnt.append(FixPnt(i,i))
+stRaodData = RoadData('road1', vFixpnt)
+stRaodData = RoadData('road1', vFixpnt)
+stRaodDataMap = {}
+stRaodDataMap.setdefault(1,RoadData('road1', vFixpnt))
+stRaodDataMap.setdefault(2,RoadData('road2', vFixpnt))
+stRaodDataMap.setdefault(3,RoadData('road3', vFixpnt))
 
-for i in range(len(a)):
-	print (a[i].x) 
+print (stRaodDataMap[1].name)
 
-class A(object):
-	def __init__(self,data):
-		self.data = data
-
-	def getData(self):
-		return self.data
-
-	def doWork(self):
-		return self.getData()
-
-	def setData(self, num):
-		self.data = num
-
-
-a = A(10)
-print (a.doWork())
-print (id(a))
-
-b = A(10)
-
-print (id(b))
-print (type(a))
-print (b.doWork())
-b.setData(50)
-print (b.doWork())
-print (a.doWork())
-
-
-# print (b.name)
-# print (b.vFixpnt)
-# for i in len(b.vFixpnt):
-# 	pass 
-# 	# print (b.vFixpnt[i].x)
-
-
-
-
+# print ('roadName = {0}'.format(stRaodData.name) )
+# for j in range(len(stRaodData.vFixpnt)):
+# 	print ('fixPntSeq = {0}, xVal = {1}'.format(j, stRaodData.vFixpnt[j].x))

@@ -1,4 +1,7 @@
 
+"""
+brief 场景内部数据
+"""
 from baseDataDef import BaseData
 
 
@@ -57,9 +60,5 @@ class QStatePathDataSet(BaseData):
 
 
 
-
-class ENUM_QACTION_TYPE(Enum):
-	E_ACTION_STOP = 1
-	E_ACTION_SLOWDOWN = 2
 
 
