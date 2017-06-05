@@ -2,61 +2,73 @@
 """
 brief 场景内部数据
 """
-from baseDataDef import BaseData
+from .baseDataDef import BaseData
 
-
-###########航班数据
-##飞行计划
+###################场景内部数据
+##########航班计划数据
+#####飞行计划
+##iID->飞行计划ID, 唯一
+##strName->飞行计划呼号
+##eFlightType->飞行计划类型 0：其他 1：进港 2：离港
+##iTaxStartTime->飞机开始滑行时间
+##iStartPosID->飞行计划起始固定点ID
+##iEndPosID->飞行计划结束固定点ID
+##bFinished->飞行计划是否结束
+##bbStarted->是否已经开始，没有开始的是未来的数据
 class FlightPlanData(BaseData):
-	_fields = ['iID', 'strName', 'eFlightType','iTaxStartTime', 'iStartPosID', 'iEndPosID', 'bFinished']
-#航班时刻表集合
-class FlightScheduleData(BaseData):
+	_fields = ['iID', 'strName', 'eFlightType','iTaxStartTime', 'iStartPosID', 'iEndPosID', 'bFinished', 'bStarted']
+
+#####飞行计划集合
+##vFlightPlan->飞行计划list
+class FlightPlanSetData(BaseData):
 	_fields = ['vFlightPlan']
 
 
-# brief:起始-终点路径点集合，包含了固定点和其默认过点时间
-class PlanPathData(BaseData):
-	_fields = ['iStartPosID', 'iEndPosID', 'vPassPntTime']
 
 
-##########路线结果
-class PassPntTimeData(BaseData):
-	_fields = ['iFixPntID', 'iTime']
+
+##########计划滑行路径结果数据
+#####最终过点时间
+##iFixID->固定点ID
+##iRealPassTime->最终绝对滑行时间，包含起始点和终止点
+class FPPassPntData(BaseData):
+	_fields = ['iFixID', 'iRealPassTime']
+
+#####最终滑行路径
+##iPathID->滑行路径ID，如果已经存在使用次数+1，如果不存在需要新生成
+##vFPPassPntData->最终过点时间list, list顺序即滑行序号
+class FPPathData(BaseData):
+	_fields = ['iPathID',  'vFPPassPntData']
+
+#####最终飞行计划计划滑行路线结果
+##FlightPlanData->飞行计划数据
+##FPPathData->滑行结果
+class FlightPlanPathData(BaseData):
+	_fields = ['FlightPlanData', 'FPPathData']
+
+#####最终滑行路线集合
+##vFPPathDataSet->最终飞行计划和路径list
+class FPPathDataSet(BaseData):
+	_fields = ['vFPPathDataSet']
 
 
-class PathOutData(BaseData):
-	_fields = ['iFlightPlanID', 'vPassPntTime']	
+####冲突结果
+##iCurFPID->当前飞行计划ID
+##iConfFPID->冲突飞行计划ID
+##eConfType->冲突类型  1：对头冲突 2：交叉冲突
+##efixPntType->冲突固定点类型
+##iConflictFixID->冲突固定点ID
+##bConfStart->冲突计划是否是未来计划
 
-class PathOutDataSet(BaseData):
-	_fields = ['vPathOutData']
-
-#########冲突对
-class ConflictDataPair(BaseData):
-	_fields = ['iFlightOneID', 'iFligtSecID', 'iConfFixID']
-
-
-#航班过每个节点集合
-
-#地图节点
-
-##########Q学习数据
-#状态S
-class QStateData(BaseData):
-	_fields = ['iStartFixID', 'iEndFixID', 'iConFixID', 'eConFixType',\
-	'eConflictType' ,'eCurFlightType', 'eConFlightType','iPathFixSetID']
-
-class QActionData(BaseData):
-	_fields = ['eActionType']
-
-class QStateScoreData(BaseData):
-	_fields = ['qState', 'qAction', 'dScore']
+class ConflictData(BaseData):
+	_fields = ['iCurFPID', 'iConfFPID', 'eConfType', 'efixPntType', 'iConflictFixID', 'bConfStart']
 
 
-class QStateScoreDataSet(BaseData):
-	_fields = ['vQStateScore']
 
-class QStatePathDataSet(BaseData):
-	_fields = ['iPathID', 'vFixPntID']
+
+
+
+
 
 
 

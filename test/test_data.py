@@ -14,6 +14,7 @@ class RoadData(BaseData):
 	_fields = ['name', 'vFixpnt']
 
 
+
 vFixpnt = []
 i = 0
 i += 1
@@ -35,6 +36,6 @@ stRaodDataMap.setdefault(3,RoadData('road3', vFixpnt))
 
 print (stRaodDataMap[1].name)
 
-# print ('roadName = {0}'.format(stRaodData.name) )
-# for j in range(len(stRaodData.vFixpnt)):
-# 	print ('fixPntSeq = {0}, xVal = {1}'.format(j, stRaodData.vFixpnt[j].x))
+print ('roadName = {0}'.format(stRaodData.name) )
+for j in range(len(stRaodData.vFixpnt)):
+	print ('fixPntSeq = {0}, xVal = {1}'.format(j, stRaodData.vFixpnt[j].x))

@@ -7,23 +7,31 @@
 print (__doc__)
 
 from ..public.data import *
+from ..public.dataManage import DataManager
+
 
 
 class UtilityTool(object):
 	dTheta = None
+	pDataManager = None
 
-	# brief:输入当前的计划，返回常规过点时间
-	# flightschedule:[in] 当前飞行计划数据
-	# vPassPntTimeData:[out] 当前飞行计划过点时间
+	# brief:输入当前的计划，返回历史使用概率最高滑行路径
+	# FlightPlanData:[in] 未来N时刻的飞行计划数据
+	# vPassPntTimeData:[out] 未来N时刻的飞行计划过点时间
 	# return:无
 	@classmethod
-	def predict_pass_time(curFlightscheduleData, vPassPntTimeData):
-		pass
-	# passPntData:[in] 当前过点时间
-	# vPassPntData:[in] 当前过点时间
-	# conflict:[out] 冲突航班对
-	def isConflict(self, passPntData, vPassPntData, conflict):
+	def predict_pass_time(cls, FlightPlanData, FPPathData):
 		pass
 
-	def resolveConflict(self, eActionType, vPassPntData):
+	# brief:输入当前的计划，确定否和现在计划集合有冲突，并返回冲突类型等其他信息
+	# FlightPlanData:[in] 当前飞行计划
+	# FPPathData:[in] 当前过点信息
+	# FPPathDataSet:[out] 目前航班对，计划完成了就不需要了
+	# ConflictData:[out] 冲突航班对和具体信息
+	# return: bool 是否有冲突
+	@classmethod
+	def isConflict(cls, FlightPlanData, FPPathData, FPPathDataSet ,ConflictData):
+		pass
+
+	def resolveConflict(cls, eActionType, vPassPntData):
 		pass

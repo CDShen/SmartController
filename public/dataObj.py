@@ -1,13 +1,8 @@
 """
 breif:主要定义存储在文件中读取后的原始数据，读取数据格式为CSV或数据库表，这里只负责读取，不需要增删改
 """
-
-
-
 from enum import Enum
-from baseDataDef import BaseData
-
-
+from .baseDataDef import BaseData
 
 
 ###################数据库基础数据
@@ -80,8 +75,8 @@ class ENUM_QACTION_TYPE(Enum):
 ##iEndFixID->结束固定点ID
 ##iConflictFixID->冲突位置固定点ID
 ##efixPntType->冲突固定点类型
-##eCurFlightType->当前航班类型
-##eConFlightType->冲突航班类型
+##eCurFlightType->当前航班类型 0：其他 1：进港 2：离港
+##eConFlightType->冲突航班类型 0：其他 1：进港 2：离港
 ##eConflictType->冲突类型 1:对头冲突 2：交叉冲突 
 ##iPathID->滑行道路的编号ID
 class QStateData(BaseData):

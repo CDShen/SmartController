@@ -1,4 +1,4 @@
-class BaseData:
+class BaseData(object):
 	_fields = []
 	def __init__(self, *args):
 		if (len(args) != len(self._fields)):
