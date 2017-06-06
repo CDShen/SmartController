@@ -3,6 +3,7 @@
 brief 场景内部数据
 """
 from .baseDataDef import BaseData
+from enum import Enum
 
 ###################场景内部数据
 ##########航班计划数据
@@ -28,17 +29,29 @@ class FlightPlanSetData(BaseData):
 
 
 ##########计划滑行路径结果数据
+
+
+##########过点类型枚举
+class ENUM_PASSPNT_TYPE(Enum):
+	E_PASSPNT_NORMAL =0 ##正常通过
+	E_PASSPNT_STOP = 1 ##停止
+	E_ACTION_SLOWDOWN = 2 ##减速
+
+
 #####最终过点时间
 ##iFixID->固定点ID
 ##iRealPassTime->最终绝对滑行时间，包含起始点和终止点
+##x->x坐标
+##y->y坐标
+##ePassPntType->过点的动作 0:正常通过 1:停止通过 2：减速通过
 class FPPassPntData(BaseData):
-	_fields = ['iFixID', 'iRealPassTime']
+	_fields = ['iFixID', 'iRealPassTime', 'x', 'y','ePassPntType']
 
 #####最终滑行路径
 ##iPathID->滑行路径ID，如果已经存在使用次数+1，如果不存在需要新生成
 ##vFPPassPntData->最终过点时间list, list顺序即滑行序号
 class FPPathData(BaseData):
-	_fields = ['iPathID',  'vFPPassPntData']
+	_fields = ['iPathID', 'vFPPassPntData']
 
 #####最终飞行计划计划滑行路线结果
 ##FlightPlanData->飞行计划数据
@@ -62,6 +75,14 @@ class FPPathDataSet(BaseData):
 
 class ConflictData(BaseData):
 	_fields = ['iCurFPID', 'iConfFPID', 'eConfType', 'efixPntType', 'iConflictFixID', 'bConfStart']
+
+
+
+##########其他数据
+##x->X方向笛卡尔坐标
+##y->Y方向笛卡尔坐标
+class CguPos(BaseData):
+	_fields = ['x','y']
 
 
 

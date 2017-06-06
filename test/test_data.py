@@ -1,3 +1,5 @@
+from math import *
+
 class BaseData:
 	_fields = []
 	def __init__(self, *args):
@@ -15,6 +17,8 @@ class RoadData(BaseData):
 
 
 
+
+
 vFixpnt = []
 i = 0
 i += 1
@@ -27,15 +31,19 @@ i += 1
 vFixpnt.append(FixPnt(i,i))
 i += 1
 vFixpnt.append(FixPnt(i,i))
-stRaodData = RoadData('road1', vFixpnt)
-stRaodData = RoadData('road1', vFixpnt)
-stRaodDataMap = {}
-stRaodDataMap.setdefault(1,RoadData('road1', vFixpnt))
-stRaodDataMap.setdefault(2,RoadData('road2', vFixpnt))
-stRaodDataMap.setdefault(3,RoadData('road3', vFixpnt))
 
-print (stRaodDataMap[1].name)
+print (sqrt(4))
 
-print ('roadName = {0}'.format(stRaodData.name) )
-for j in range(len(stRaodData.vFixpnt)):
-	print ('fixPntSeq = {0}, xVal = {1}'.format(j, stRaodData.vFixpnt[j].x))
+
+# stRaodData = RoadData('road1', vFixpnt)
+# stRaodData = RoadData('road1', vFixpnt)
+# stRaodDataMap = {}
+# stRaodDataMap.setdefault(1,RoadData('road1', vFixpnt))
+# stRaodDataMap.setdefault(2,RoadData('road2', vFixpnt))
+# stRaodDataMap.setdefault(3,RoadData('road3', vFixpnt))
+#
+# print (stRaodDataMap[1].name)
+#
+# print ('roadName = {0}'.format(stRaodData.name) )
+# for j in range(len(stRaodData.vFixpnt)):
+# 	print ('fixPntSeq = {0}, xVal = {1}'.format(j, stRaodData.vFixpnt[j].x))

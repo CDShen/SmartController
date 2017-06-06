@@ -1,23 +1,24 @@
-class TestStaticMethod(object):
+class TmpStaticMethod(object):
 	dTheta = None
 	@classmethod
 	def doWork(cls):
-		print ('dTheta ={0}'.format(TestStaticMethod.dTheta))
+		print ('dTheta ={0}'.format(1))
+		TmpStaticMethod.doWorkStatic()
 
-	@staticmethod	
+	@staticmethod
 	def doWorkStatic():
-		print ('dTheta ={0}'.format(TestStaticMethod.dTheta))
-
-
+		print ('dTheta ={0}'.format(2))
 
 
 class B(object):
 	def doWork(self):
-		TestStaticMethod.doWorkStatic()
+		TmpStaticMethod.doWork()
 
-# TestStaticMethod.dTheta = 0.90
-# b = B()
-# b.doWork()
+
+TmpStaticMethod.dTheta = 0.90
+print (TmpStaticMethod.dTheta)
+b = B()
+b.doWork()
 
 
 
