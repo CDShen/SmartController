@@ -1,0 +1,50 @@
+"""
+brief 结合DataManager、FlightMgr和utility进行错误的滑行路线的评分和输出
+"""
+from .flightPlanMgr import FlightPlanMgr
+from ..public.dataManage import DataManager
+from .utility import UtilityTool
+from .flightPlan import FlightPlan
+
+class PathSelect(object):
+    def __init__(self, pDataManage, pFlightMgr):
+        self.pDataManage = pDataManage
+        self.pFlightMgr = pFlightMgr
+        self.pFlightPlan = None
+
+    def setCurFlightPlan(self, pFlightPlan):
+        self.pFlightPlan = pFlightPlan
+
+    def selectPath(self):
+        #获取该路径的所有合法路径
+        CurFlightPlanData = self.pFlightPlan.GetFlightPlanData()
+        iStartID = CurFlightPlanData.iStartPosID
+        iEndId = CurFlightPlanData.iEndPosID
+        vHistoryPathData = self.pDataManage.getFlightPlanAllPath(iStartID, iEndId)
+
+        #判断该路径是否有冲突，如果有冲突用Q学习产生并更新Q数据
+        ScorePathLst = []
+        for i in range(len(vHistoryPathData)):
+            ScorePathDic = self._pathScore(vHistoryPathData[i])
+            ScorePathLst.append(ScorePathDic)
+
+        ##路线排序
+
+        dMaxScore = ScorePathLst[0].get('score')
+        bestProperPath = ScorePathLst[0].get('path')
+
+        self.pFlightPlan.setBestProperPath(bestProperPath)
+
+
+    ##返回dict
+    def _pathScore(self, HistoryPathData):
+        ScorePathDic = {'score': None, 'path': None}
+        dScore = 0.0
+
+        return
+
+
+
+
+
+

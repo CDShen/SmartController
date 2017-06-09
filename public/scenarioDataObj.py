@@ -7,6 +7,13 @@ from enum import Enum
 
 ###################场景内部数据
 ##########航班计划数据
+
+#####飞行计划状态
+class ENUM_FP_STATUS(Enum):
+	E_STATUS_ACTIVE = 1  ##激活
+	E_STATUS_FUTURE = 2  ##未来计划
+	E_STATUS_FIN = 3 ##结束
+
 #####飞行计划
 ##iID->飞行计划ID, 唯一
 ##strName->飞行计划呼号

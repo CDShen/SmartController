@@ -1,4 +1,5 @@
 from math import *
+import copy
 
 class BaseData:
 	_fields = []
@@ -19,20 +20,29 @@ class RoadData(BaseData):
 
 
 
-vFixpnt = []
-i = 0
-i += 1
-vFixpnt.append(FixPnt(i,i))
-i += 1
-vFixpnt.append(FixPnt(i,i))
-i += 1
-vFixpnt.append(FixPnt(i,i))
-i += 1
-vFixpnt.append(FixPnt(i,i))
-i += 1
-vFixpnt.append(FixPnt(i,i))
+class A(object):
+	def __init__(self, name):
+		self.name = name
+	def getName(self):
+		return  self.name
 
-print (sqrt(4))
+
+class B(A):
+	pass
+
+
+
+
+b = {}
+
+b.setdefault('name','shenjiankai')
+b.setdefault(3,1)
+
+c = b.get(3)
+
+print (c)
+
+#print (super(B, c).getName())
 
 
 # stRaodData = RoadData('road1', vFixpnt)
