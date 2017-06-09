@@ -42,7 +42,7 @@ class FlightPlanSetData(BaseData):
 class ENUM_PASSPNT_TYPE(Enum):
 	E_PASSPNT_NORMAL =0 ##正常通过
 	E_PASSPNT_STOP = 1 ##停止
-	E_ACTION_SLOWDOWN = 2 ##减速
+	E_PASSPNT_SLOWDOWN = 2 ##减速
 
 
 #####最终过点时间
