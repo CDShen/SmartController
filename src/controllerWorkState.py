@@ -6,12 +6,17 @@ class ControllerWorkState(object):
 
 
 ##brief:学习状态类
+##remark:暂时先写到LearnWorkState最后在放在基类中
 class LearnWorkState(ControllerWorkState):
 	def __init__(self, pFlightMgr, pPathSelect):
 		self.pFlightMgr = pFlightMgr
 		self.pPathSelect = pPathSelect
 		self.bFinished = False
 		self.iFutureMin = 10 ##未来N分钟的时间
+
+	##brief 加载数据集
+	def loadDataSet(self):
+		pass
 	def onProcessMsg(self, msg):
 		pass
 	##brief 处理时钟包，学习模式不需要处理时钟包
@@ -23,24 +28,36 @@ class LearnWorkState(ControllerWorkState):
 	def doWork(self):
 		while 1>0:
 			##获取下一个飞行计划
-			nextFlightPlan = self._getNextFlightPlan()
-			if nextFlightPlan == None:
+			pNextFlightPlan = self._getNextFlightPlan()
+			if pNextFlightPlan == None:
+				##训练结束
 				return
 			else:
+				self.pFlightMgr.setCurFlightPlanID(pNextFlightPlan.getFlightPlanID())
+				iTime = pNextFlightPlan.getFlightPlanStartTime()
+				##更新此时刻的飞行计划状态
+				self._updateFlightPlan(iTime)
+				##将此计划N分钟后的飞行计划加入集合和去除已经完成的飞行计划
+				self._addFutureFlightPlan(iTime + self.iFutureMin*60)
+				self._refreshFlightPlanSet()
+				##对合法路径进行打分、更新Q值后加入集合
+				self._pathSelect.setCurFlightPlan(pNextFlightPlan)
+				self._pathSelect()
+
 				pass
-			##将此计划的后N分钟计划加入集合
-
-
-
-		##对合法路径进行打分、更新Q值后加入集合
-		##返回合法路径
 		pass
 	def _getNextFlightPlan(self):
 		return self.pFlightMgr.getNextFlightPlan()
-	def _updateFutureFlightPlan(self):
-		self.pFlightMgr.updateFutureFlightPlan()
-	def _pathSelect(self, curFlpghtPlan):
-		pass
+	def _addFutureFlightPlan(self, iTime):
+		self.pFlightMgr.addFutureFlightPlan(iTime)
+
+	def _pathSelect(self):
+		self.pPathSelect.selectPath()
+	def _updateFlightPlan(self, iTime):
+		self.pFlightMgr.updateFlightPlan(iTime)
+	##更新需要计算的飞行计划集合
+	def _refreshFlightPlanSet(self):
+		self.pFlightMgr.refreshFlightPlanSet()
 
 
 

@@ -7,6 +7,7 @@ from ..public.scenarioDataObj import *
 
 
 class FlightPlanGen(object):
+	@classmethod
 	def GeneFlightPlan(cls):
 		pass
 

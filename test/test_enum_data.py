@@ -11,4 +11,11 @@ class Animal(Enum):
 # 	print (i.value)
 
 a = Animal.ant
-print (a.name)
+b = Animal.ant
+c = Animal.dog
+
+if a <= b:
+	print('same')
+
+if b <= c:
+	print('same')
