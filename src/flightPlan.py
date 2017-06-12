@@ -15,7 +15,7 @@ class FlightPlan(object):
 	def setBestProperPath(self, FPPathData):
 		self.FPPathData = FPPathData
 
-	def GetFlightPlanData(self):
+	def getFlightPlanData(self):
 		return self.FlightPlanData
 	def setTaxState(self, FPPathData):
 		self.TaxState = TaxSimulator(self, FPPathData)
@@ -50,6 +50,9 @@ class FlightPlan(object):
 	##飞行计划ID
 	def getFlightPlanID(self):
 		return self.FlightPlanData.iID
+	##得到飞行计划滑行路径
+	def getFlightPlanPath(self):
+		return self.FPPathData
 
 
 

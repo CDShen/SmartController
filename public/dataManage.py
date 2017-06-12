@@ -8,4 +8,4 @@ class DataManager(object):
     def init(self):
         pass
     def getFlightPlanAllPath(self, iStartID, iEndID):
-        return vHistoryPathData
+        return vPathData

@@ -21,15 +21,15 @@ class PathSelect(object):
         CurFlightPlanData = self.pFlightPlan.GetFlightPlanData()
         iStartID = CurFlightPlanData.iStartPosID
         iEndId = CurFlightPlanData.iEndPosID
-        vHistoryPathData = self.pDataManage.getFlightPlanAllPath(iStartID, iEndId)
+        vPathData = self.pDataManage.getFlightPlanAllPath(iStartID, iEndId)
 
         #判断该路径是否有冲突，如果有冲突用Q学习产生并更新Q数据
         ScorePathLst = []
-        for i in vHistoryPathData:
-            ScorePathDic = self._pathScore(vHistoryPathData[i-1])
+        for i in range(len(vPathData)):
+            ScorePathDic = self._pathScore(vPathData[i])
             ScorePathLst.append(ScorePathDic)
 
-        ##路线排序,分数由大到小
+        ##路线排序,冒泡分数由大到小
         for i in range(len(ScorePathLst) - 1):
             bOK = True
             for j in range(0, len(ScorePathLst) - 1 - i):
@@ -57,7 +57,7 @@ class PathSelect(object):
 
 
     ##返回dict
-    def _pathScore(self, HistoryPathData):
+    def _pathScore(self, PathData):
         ScorePathDic = {'score': None, 'path': None}
         dScore = 0.0
 

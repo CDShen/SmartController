@@ -8,7 +8,6 @@ print (__doc__)
 
 from math import *
 from ..public.data import *
-from ..public.data import *
 from ..public.scenarioDataObj import CguPos
 from ..public.dataManage import DataManager
 
@@ -51,3 +50,10 @@ class MathUtilityTool(object):
 	def GetUnitVec(cls, CguPos1):
 		dis = MathUtilityTool.Distance(CguPos1, CguPos(0,0))
 		return CguPos(CguPos1.x/dis, CguPos1.y/dis)
+
+	@classmethod
+	def isInsect(cls, num1Start, num1End, num2Start, num2End):
+		if num2End < num1Start or num2Start > num1End:
+			return  False
+		else:
+			return  True

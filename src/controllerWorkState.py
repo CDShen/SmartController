@@ -41,7 +41,7 @@ class LearnWorkState(ControllerWorkState):
 				self._addFutureFlightPlan(iTime + self.iFutureMin*60)
 				self._refreshFlightPlanSet()
 				##对合法路径进行打分、更新Q值后加入集合
-				self._pathSelect.setCurFlightPlan(pNextFlightPlan)
+				self.pPathSelect.setCurFlightPlan(pNextFlightPlan)
 				self._pathSelect()
 
 				pass
