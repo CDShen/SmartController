@@ -62,6 +62,9 @@ class FlightPlanMgr(object):
 			if pFlightPlan.isFlightPlanFin():
 				del self.FlightPlanDic[k]
 
+	def isFlightPlanStartByID(self, iFlightPlanID):
+		return  self.FlightPlanDic.get(iFlightPlanID).isFplightPlanStart()
+
 
 
 

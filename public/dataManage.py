@@ -9,3 +9,6 @@ class DataManager(object):
         pass
     def getFlightPlanAllPath(self, iStartID, iEndID):
         return vPathData
+    def getFixPntConType(self, iFixPntID):
+        efixPntType = E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_ARR
+        return efixPntType

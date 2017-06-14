@@ -15,6 +15,11 @@ from .baseDataDef import BaseData
 ##dY->固定节点笛卡尔Y坐标值
 ##eConflictType->固定节点冲突类型 0：先来先服务 1：进港优先 2：离港优先
 
+class E_FIXPOINT_CONF_TYPE(Enum):
+	E_FIXPOINT_CONF_FIFS = 0  ##先来先服务
+	E_FIXPOINT_CONF_ARR = 1  ##进港优先
+	E_FIXPOINT_CONF_DEP = 2  ##离港优先
+
 
 class FixPointData(BaseData):
 	_fields = ['iID', 'strName', 'dX', 'dY','eConflictType']

@@ -7,8 +7,10 @@ taxiPathMap = {iNodeID:[NodeFlightPlanData]}
 from ..public.baseDataDef import BaseData
 from ..public.dataManage import DataManager
 from .flightPlan import FlightPlan
+from .flightPlanMgr import FlightPlanMgr
 from math import *
 from .utility import MathUtilityTool
+from ..public.dataObj import *
 
 
 class NodeFlightPlanData(BaseData):
@@ -17,11 +19,11 @@ class NodeFlightPlanData(BaseData):
 
 ##地图滑行节点类
 class TaxiMap(object):
-	def __init__(self, pDataManager):
+	def __init__(self, pDataManager, pFlightPlanMgr):
 		self.taxiNodeDic = {} ## 格式{id:[adjId....], ....}
 		self.taxiPathDic = {} ## 格式{id:[NodeFlightPlanData...]}
 		self.pDataManager = pDataManager
-
+		self.pFlightPlanMgr = pFlightPlanMgr
 	##brief 初始化基础地图数据
 	def initMapData(self):
 		pass
@@ -39,7 +41,7 @@ class TaxiMap(object):
 
 
 
-	##brief 添加一个飞行计划
+	##brief 添加一个飞行计划路径
 	def addFlightPlanPath(self, pFlightPlan):
 		stFlightPlanData = pFlightPlan.getFlightPlanData()
 		stFPPathData = pFlightPlan.getFlightPlanPath()
@@ -66,6 +68,7 @@ class TaxiMap(object):
 	##1、如果当前冲突是当前航班优先，则不认为有冲突
 	def isConflict(self, pFlightPlan, PathData, ConflictData):
 		bConflict = False
+		vConflictData = [] ##冲突集合，如果冲突集合超过2次，需要警告
 		iStartTime = pFlightPlan.getFlightPlanStartTime()
 		for i in range(len(PathData.vPassPntData)-1):
 			stPassPntData = PathData.vPassPntData[i]
@@ -79,6 +82,7 @@ class TaxiMap(object):
 			for j in range(len(AdjNodeLst)):
 				##相反节点A->B 与 B->A
 				if AdjNodeLst[j] == stPassPntData.iFixID:
+					##AdjNodeFlightPlanDataLst:固定点的所有飞行计划和过点时间
 					AdjNodeFlightPlanDataLst = self.getNodePassPnt(AdjNodeLst[j])
 					TmpNodeFlightPlanDataLst = [] ## [[1,2], [1,2]]两个点都需要知道
 					TmpNodeFlightPlanDataPair = []
@@ -92,10 +96,24 @@ class TaxiMap(object):
 
 					iFirstTime = stPassPntData.iRelaPassTime + iStartTime
 					iFirstTimeNext = stNextPassPntData.iRelaPassTime + iStartTime
+					##冲突超过2个需要警告
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iSecondTime = TmpNodeFlightPlanDataLst[k][0].iRealPassTime
 						iSecondTimeNext = TmpNodeFlightPlanDataLst[k][1].iRealPassTime
-						if MathUtilityTool.isInsect(iFirstTime, iFirstTimeNext, iSecondTime, iSecondTimeNext):
+						##不考虑顺向冲突
+						if iSecondTime > iSecondTimeNext:
+							break
+
+						iConFlightPlanID = TmpNodeFlightPlanDataLst[k][0].iFlightPlanID
+						eFixPntType = self.pDataManager.getFixPntConType(stNextPassPntData.iFixID)
+						if MathUtilityTool.isInsect(iFirstTime, iFirstTimeNext, iSecondTime, iSecondTimeNext)
+							or （eFixPntType.value = E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_ARR and
+
+							E_FIXPOINT_CONF_FIFS = 0  ##先来先服务
+							E_FIXPOINT_CONF_ARR = 1  ##进港优先
+							E_FIXPOINT_CONF_DEP = 2  ##离港优先
+
+							self.pFlightPlanMgr.isFlightPlanStartByID(iConFlightPlanID) and
 							##有冲突
 							pass
 

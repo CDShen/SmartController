@@ -78,10 +78,11 @@ class FPPathDataSet(BaseData):
 ##eConfType->冲突类型  1：对头冲突 2：交叉冲突
 ##efixPntType->冲突固定点类型
 ##iConflictFixID->冲突固定点ID
-##bConfStart->冲突计划是否是未来计划
+##iCurPathID->当前计划的冲突路线ID
+##iConPathID->冲突计划的滑行路线ID
 
 class ConflictData(BaseData):
-	_fields = ['iCurFPID', 'iConfFPID', 'eConfType', 'efixPntType', 'iConflictFixID', 'bConfStart']
+	_fields = ['iCurFPID', 'iConfFPID', 'eConfType', 'efixPntType', 'iConflictFixID', 'iCurPathID', 'iConPathID']
 
 
 
