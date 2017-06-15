@@ -20,6 +20,7 @@ class LearnWorkState(ControllerWorkState):
 	def onProcessMsg(self, msg):
 		pass
 	##brief 处理时钟包，学习模式不需要处理时钟包
+	##整个数据集处理完成之后在开始滑行，因为可能涉及到已经开始滑行的飞机也需要调整路径
 	def processTimePacket(self, timePacket):
 		##取当前的计划运算更新Q状态
 		##当前集合的飞机运算看是否结束

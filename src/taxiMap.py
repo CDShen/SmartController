@@ -62,7 +62,7 @@ class TaxiMap(object):
 		return  self.taxiPathDic.get(iFixPntID)
 
 	##判断是否需要Q函数解决冲突
-	def judgeNeedQFunResolveCon(self, pFlightPlan, PathData ,pConFlightPlan, iFirstPassTime, iSecOndPassTime):
+	def judgeNeedQFunResolveCon(self, pFlightPlan, PathData ,pConFlightPlan, ConflictData, iFirstPassTime, iSecOndPassTime):
 		eCurFlightPlanType = pFlightPlan.getFlightType()
 		eConFlightPlanType = pConFlightPlan.getFlightType()
 		eConFixType = ConflictData.efixPntType

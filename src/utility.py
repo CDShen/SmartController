@@ -31,10 +31,49 @@ class UtilityTool(object):
 	# conFPPathData:[in] 冲突滑行路线
 	# ConflictData:[in] 冲突数据
 	# newPath:[out] 解决后新的滑行路线
+	# warning
 	@classmethod
-	def resolveConflict(cls, curFPPathData, conFPPathData ,ConflictData, newPath):
+	def resolveConflict(cls, curFPathData, conFPPathData ,ConflictData, newPath):
 		iConFixID = ConflictData.iConflictFixID
-		pass
+		iFirstStartIndex = -1
+		iSecondStartFixIDIndex = -1
+		for i in range(len(curFPathData.vFPPassPntData)):
+			if curFPathData.vFPPassPntData[i].iFixID == iConFixID:
+				iFirstStartIndex = i
+
+		for i in range(len(curFPathData.vFPPassPntData)):
+			if conFPPathData.vFPPassPntData[i].iFixID == iConFixID:
+				iSecondStartFixIDIndex = i
+
+		##查找到最开始的公共冲突点
+		j=1
+		iFirstCommonStartIndex = -1
+		iSecCommonStartIndex = -1
+		for i in range(iFirstStartIndex+1, len(curFPathData.vFPPassPntData)):
+			if iSecondStartFixIDIndex - j <= 0:
+				break
+
+			if curFPathData.vFPPassPntData[i].iFixID == conFPPathData.vFPPassPntData[iSecondStartFixIDIndex-j].iFixID:
+				j+=1
+				iFirstCommonStartIndex = i
+				iSecCommonStartIndex = iSecondStartFixIDIndex-j
+			else:
+				break
+
+		##获得公共节点的过点时间
+		iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
+		for i in range(len(conFPPathData.vFPPassPntData)):
+			if i < iSecCommonStartIndex:
+				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+				pass
+			elif i == iSecCommonStartIndex:
+				stFPPassPntData = conFPPathData.vFPPassPntData[i]
+				stFPPassPntData.iRealPassTime = iCommonConPassPntTime + 20 ##默认添加20s
+				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+
+				pass
+			else:
+				pass
 
 
 	# def resolveConflict(cls, eActionType, vPassPntData):
