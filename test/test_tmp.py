@@ -1,3 +1,5 @@
 import math
+good = False
 
-print (math.fabs(-1.0))
+if good == False:
+    print (1)

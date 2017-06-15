@@ -54,11 +54,15 @@ class FlightPlan(object):
 	def getFlightPlanPath(self):
 		return self.FPPathData
 
-	def isFlightPlanStart(self):
+	def isFutureFlightPlan(self):
 		if self.eStatus.value == ENUM_FP_STATUS.E_STATUS_FUTURE.value:
 			return  True
 		else:
 			return  False
+
+	def getFlightType(self):
+		return  self.FlightPlanData.eFlightType
+
 
 
 

@@ -26,14 +26,14 @@ class UtilityTool(object):
 	def predict_pass_time(cls, FlightPlanData, FPPathData):
 		pass
 
-	# brief:输入当前的计划，确定否和现在计划集合有冲突，并返回冲突类型等其他信息
-	# FlightPlanData:[in] 当前飞行计划
-	# FPPathData:[in] 当前过点信息
-	# FPPathDataSet:[out] 目前航班计划集合，计划完成了就不需要了
-	# ConflictData:[out] 冲突航班对和具体信息
-	# return: bool 是否有冲突
+	# brief:解决冲突并返回冲突后的路径
+	# curFPPathData:[in] 当前计划滑行路线
+	# conFPPathData:[in] 冲突滑行路线
+	# ConflictData:[in] 冲突数据
+	# newPath:[out] 解决后新的滑行路线
 	@classmethod
-	def isConflict(cls, FlightPlanData, FPPathData, FPPathDataSet ,ConflictData):
+	def resolveConflict(cls, curFPPathData, conFPPathData ,ConflictData, newPath):
+		iConFixID = ConflictData.iConflictFixID
 		pass
 
 

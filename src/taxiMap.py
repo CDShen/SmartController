@@ -61,12 +61,45 @@ class TaxiMap(object):
 	def getNodePassPnt(self, iFixPntID):
 		return  self.taxiPathDic.get(iFixPntID)
 
+	##判断是否需要Q函数解决冲突
+	def judgeNeedQFunResolveCon(self, pFlightPlan, PathData ,pConFlightPlan, iFirstPassTime, iSecOndPassTime):
+		eCurFlightPlanType = pFlightPlan.getFlightType()
+		eConFlightPlanType = pConFlightPlan.getFlightType()
+		eConFixType = ConflictData.efixPntType
+		bIsFuturePlan = pConFlightPlan.isFutureFlightPlan()
+		if eCurFlightPlanType == eConFlightPlanType or\
+			(eCurFlightPlanType != eConFlightPlanType and eConFixType.value == E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_FIFS):
+
+			if iFirstPassTime > iSecOndPassTime:
+				##需要Q函数处理
+				pass
+			else:
+				if bIsFuturePlan == True:
+					##不需要处理
+					pass
+				else:
+					##调用公共函数解决冲突
+					pass
+
+		elif eCurFlightPlanType != eConFlightPlanType and eCurFlightPlanType.value == eConFixType.value:
+			if bIsFuturePlan == True:
+				##不需要处理
+				pass
+			else:
+				##调用公共函数解决冲突
+				pass
+
+		elif eCurFlightPlanType != eConFlightPlanType and eConFlightPlanType.value == eConFixType.value:
+			##需要Q函数处理
+			pass
 
 
-	##brief 判断当前路线是否有冲突
+
+
+	##brief 判断当前路线是否有冲突，只返回需要用Q函数需要解决的冲突
 	##ConflictData[out] 返回冲突数据
 	##1、如果当前冲突是当前航班优先，则不认为有冲突
-	def isConflict(self, pFlightPlan, PathData, ConflictData):
+	def isConflict(self, pFlightPlan, PathData,ConflictData):
 		bConflict = False
 		vConflictData = [] ##冲突集合，如果冲突集合超过2次，需要警告
 		iStartTime = pFlightPlan.getFlightPlanStartTime()
@@ -106,15 +139,8 @@ class TaxiMap(object):
 
 						iConFlightPlanID = TmpNodeFlightPlanDataLst[k][0].iFlightPlanID
 						eFixPntType = self.pDataManager.getFixPntConType(stNextPassPntData.iFixID)
-						if MathUtilityTool.isInsect(iFirstTime, iFirstTimeNext, iSecondTime, iSecondTimeNext)
-							or （eFixPntType.value = E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_ARR and
-
-							E_FIXPOINT_CONF_FIFS = 0  ##先来先服务
-							E_FIXPOINT_CONF_ARR = 1  ##进港优先
-							E_FIXPOINT_CONF_DEP = 2  ##离港优先
-
-							self.pFlightPlanMgr.isFlightPlanStartByID(iConFlightPlanID) and
-							##有冲突
+						if MathUtilityTool.isInsect(iFirstTime, iFirstTimeNext, iSecondTime, iSecondTimeNext):
+							##有冲突，继续判断是否需要Q函数解决
 							pass
 
 
@@ -132,7 +158,7 @@ class TaxiMap(object):
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iPassTime = iStartTime + stNextPassPntData.iRelaPassTime
 						if fabs(iPassTime - TmpNodeFlightPlanDataLst.iRealPassTime) < 10:
-							##有冲突
+							##有冲突，继续判断是否需要Q函数解决
 							pass
 
 

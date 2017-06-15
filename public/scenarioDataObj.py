@@ -14,6 +14,14 @@ class ENUM_FP_STATUS(Enum):
 	E_STATUS_FUTURE = 2  ##未来计划
 	E_STATUS_FIN = 3 ##结束
 
+
+#####飞行计划类型
+class ENUM_FP_TYPE(Enum):
+	E_FP_TYPE_NONE = 0  ##未知
+	E_FP_TYPE_ARR = 1  ##进港计划
+	E_FP_TYPE_DEP = 2 ##离港计划
+
+
 #####飞行计划
 ##iID->飞行计划ID, 唯一
 ##strName->飞行计划呼号
