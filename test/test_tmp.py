@@ -10,26 +10,24 @@ class A(object):
 
 class B(object):
     def __init__(self, A):
-         self.data = copy.deepcopy(A.data)
+         self.data = A.data
 
     def getData(self):
-        return copy.deepcopy(self.data)
+        return self.data
 # print (len(a))
 
 
-a = A()
-a.data = [1,2,3]
 
-b = B(a)
+a = [1,[5, 9],3]
 
-c = b.getData()
-
-c[1] = 'xxx'
+iMaxNum = -1
+iIndex = -1
 
 
-print(a.data)
-print(b.data)
-print(c)
 
-print(id(a), id(b))
+iMaxNum = a
+
+iMaxNum = {'44444444444'}
+
+print(a)
 

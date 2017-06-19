@@ -10,6 +10,7 @@ from math import *
 from ..public.data import *
 from ..public.scenarioDataObj import CguPos
 from ..public.dataManage import DataManager
+import copy
 
 
 
@@ -25,6 +26,7 @@ class UtilityTool(object):
 	@classmethod
 	def predict_pass_time(cls, FlightPlanData, FPPathData):
 		pass
+
 
 	# brief:解决冲突并返回冲突后的路径
 	# curFPPathData:[in] 当前计划滑行路线
@@ -62,22 +64,35 @@ class UtilityTool(object):
 
 		##获得公共节点的过点时间
 		iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
+		iDiffTime = -1
 		for i in range(len(conFPPathData.vFPPassPntData)):
 			if i < iSecCommonStartIndex:
 				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
 				pass
 			elif i == iSecCommonStartIndex:
 				stFPPassPntData = conFPPathData.vFPPassPntData[i]
-				stFPPassPntData.iRealPassTime = iCommonConPassPntTime + 20 ##默认添加20s
+				iOrgTime = conFPPathData.vFPPassPntData[i].iRealPassTime
+				iNewTime = iCommonConPassPntTime + 20
+				iDiffTime = iNewTime - iOrgTime
+				stFPPassPntData.iRealPassTime = iNewTime ##默认添加20s
 				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
-
-				pass
 			else:
-				pass
+				stFPPassPntData = conFPPathData.vFPPassPntData[i]
+				stFPPassPntData.iRealPassTime += iDiffTime
+
+	# brief:解决冲突并返回冲突后的路径
+	# iStartTime:[in] 当前计划滑行路线
+	# FPPathData:[in] 冲突滑行路线
+	# return iTotalTime返回滑行时间
+	@classmethod
+	def getTotalTaxiTime(cls, iStartTime,FPPathData):
+		iTotalTime = 0
+		for i in range(len(FPPathData.vFPPassPntData)):
+			iTotalTime += FPPathData.vFPPassPntData[i].iRealPassTime - iStartTime
+		return  iTotalTime
 
 
-	# def resolveConflict(cls, eActionType, vPassPntData):
-	# 	pass
+
 
 
 class MathUtilityTool(object):

@@ -8,8 +8,12 @@ from ..public.scenarioDataObj import *
 
 class FlightPlanGen(object):
 	@classmethod
-	def GeneFlightPlan(cls):
-		pass
+	#brief 产生飞行计划，产生的飞行计划已经包含了历史滑行数据
+	def GeneFlightPlan(cls, n):
+		vFlightPlanData = None
+		return vFlightPlanData
+
+
 
 
 

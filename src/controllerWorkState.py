@@ -26,8 +26,9 @@ class LearnWorkState(ControllerWorkState):
 		##当前集合的飞机运算看是否结束
 		pass
 	##brief 开始学习入口
+	##学习时候都是学习完成之后在开始滑行
 	def doWork(self):
-		while 1>0:
+		while 1:
 			##获取下一个飞行计划
 			pNextFlightPlan = self._getNextFlightPlan()
 			if pNextFlightPlan == None:

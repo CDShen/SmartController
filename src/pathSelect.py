@@ -5,13 +5,15 @@ from .flightPlanMgr import FlightPlanMgr
 from ..public.dataManage import DataManager
 from .utility import UtilityTool
 from .flightPlan import FlightPlan
+from .taxiMap import TaxiMap
 
 class PathSelect(object):
-    def __init__(self, pDataManage, pFlightMgr, dThresholdScore):
+    def __init__(self, pDataManage, pFlightMgr, dThresholdScore, pTaxiMap):
         self.pDataManage = pDataManage
         self.pFlightMgr = pFlightMgr
         self.pFlightPlan = None
         self.dThresholdScore = dThresholdScore ##路线最低分阈值
+        self.pTaxiMap = pTaxiMap
 
     def setCurFlightPlan(self, pFlightPlan):
         self.pFlightPlan = pFlightPlan

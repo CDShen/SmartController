@@ -1,10 +1,19 @@
 from ..public.scenarioDataObj import *
+from .taxiMap import TaxiMap
+from .flightPlanGen import FlightPlanGen
 
 class FlightPlanMgr(object):
 	def __init__(self):
-		self.FlightPlanDic = None ##格式{ id, 'FlightPlan'}
-		self.curFlightPlanDic = None ##当前需要参加运算的飞行计划集合
+		self.FlightPlanDic = {} ##格式{ id, 'FlightPlan'}
+		self.curFlightPlanDic = {} ##当前需要参加运算的飞行计划集合
 		self.iCurFlanID = -1
+		self.pTaxiMap = None
+	##brief 创建飞行计划
+	def createFlightPlan(self, n):
+		vFlightPlanData = FlightPlanGen.GeneFlightPlan(n)
+		for i in range(len(vFlightPlanData)):
+			pass
+
 	##1、获取下一个飞行计划，如果为空表示该episode结束，时间根据ID递增
 	##2、判断是否该飞行计划时候是否有飞行计划已经结束并置位
 	def getNextFlightPlan(self, iStartID = -1):
@@ -53,14 +62,18 @@ class FlightPlanMgr(object):
 					self.curFlightPlanDic.setdefault(iFPlanID, pFlightPlan)
 			else:
 				break
-			iFPlanID+=1
+			iFPlanID += 1
 			pFlightPlan = self.getNextFlightPlan(iFPlanID)
 
 	def refreshFlightPlanSet(self):
 		for k in self.curFlightPlanDic:
 			pFlightPlan = self.FlightPlanDic.get(k)
 			if pFlightPlan.isFlightPlanFin():
+				##删除滑行路线
+				self.pTaxiMap.delFlightPlanPath(pFlightPlan)
+				##删除飞行计划
 				del self.FlightPlanDic[k]
+
 
 	def isFlightPlanStartByID(self, iFlightPlanID):
 		return  self.FlightPlanDic.get(iFlightPlanID).isFplightPlanStart()
