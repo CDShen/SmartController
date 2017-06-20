@@ -1,5 +1,4 @@
-# from .src.smartControllerAPP import SmartControllerAPP
-from test.test_tmp import *
+from code.src.smartControllerAPP import SmartControllerAPP
 
 
 def mainApp():

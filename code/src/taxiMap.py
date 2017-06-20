@@ -4,10 +4,12 @@ brief 1、滑行路线和地图节点的更新 2、负责有部分冲突的解�
 滑行地图结构体类型例子
 taxiPathMap = {iNodeID:[NodeFlightPlanData]}
 """
+from .flightPlanMgr import FlightPlanMgr
 from ..public.baseDataDef import BaseData
 from ..public.dataManage import DataManager
 from .flightPlan import FlightPlan
-from .flightPlanMgr import FlightPlanMgr
+# from .flightPlanMgr import FlightPlanMgr
+
 from math import *
 from .utility import MathUtilityTool
 from ..public.dataObj import *

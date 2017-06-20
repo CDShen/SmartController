@@ -7,7 +7,7 @@
 print (__doc__)
 
 from math import *
-from ..public.data import *
+from ..public.dataObj import *
 from ..public.scenarioDataObj import CguPos
 from ..public.dataManage import DataManager
 import copy
