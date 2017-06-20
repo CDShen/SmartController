@@ -5,10 +5,9 @@ from .taxSimulator import TaxSimulator
 class FlightPlan(object):
 	##brief 飞行计划初始化
 	##FlightPlanData[in]->飞行计划信息
-	def __init__(self, FlightPlanData):
+	def __init__(self, FlightPlanData, FPPathData):
 		self.FlightPlanData = FlightPlanData
-		self.FPPathData = None
-		self.CguPos = None
+		self.FPPathData = FPPathData
 		self.eStatus = ENUM_FP_STATUS.E_STATUS_FUTURE
 
 	#brief获取最佳的滑行路线
@@ -63,7 +62,8 @@ class FlightPlan(object):
 	def getFlightType(self):
 		return  self.FlightPlanData.eFlightType
 
-
+	def clearPath(self):
+		self.FPPathData = None
 
 
 

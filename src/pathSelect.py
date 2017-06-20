@@ -8,19 +8,19 @@ from .flightPlan import FlightPlan
 from .taxiMap import TaxiMap
 
 class PathSelect(object):
-    def __init__(self, pDataManage, pFlightMgr, dThresholdScore, pTaxiMap):
-        self.pDataManage = pDataManage
-        self.pFlightMgr = pFlightMgr
+    def __init__(self, dThresholdScore, pFlightMgr):
         self.pFlightPlan = None
         self.dThresholdScore = dThresholdScore ##路线最低分阈值
-        self.pTaxiMap = pTaxiMap
+        self.pTaxiMap = pFlightMgr.pTaxiMap
+        self.pFlightMgr = pFlightMgr
+        self.pDataManage = pFlightMgr.pDataManage
 
     def setCurFlightPlan(self, pFlightPlan):
         self.pFlightPlan = pFlightPlan
 
     def selectPath(self):
         #获取该路径的所有合法路径
-        CurFlightPlanData = self.pFlightPlan.GetFlightPlanData()
+        CurFlightPlanData = self.pFlightPlan.getFlightPlanData()
         iStartID = CurFlightPlanData.iStartPosID
         iEndId = CurFlightPlanData.iEndPosID
         vPathData = self.pDataManage.getFlightPlanAllPath(iStartID, iEndId)

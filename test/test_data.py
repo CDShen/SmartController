@@ -33,27 +33,4 @@ class B(A):
 
 
 
-b = {}
 
-b.setdefault('name','shenjiankai')
-b.setdefault(3,1)
-
-c = b.get(3)
-
-print (c)
-
-#print (super(B, c).getName())
-
-
-# stRaodData = RoadData('road1', vFixpnt)
-# stRaodData = RoadData('road1', vFixpnt)
-# stRaodDataMap = {}
-# stRaodDataMap.setdefault(1,RoadData('road1', vFixpnt))
-# stRaodDataMap.setdefault(2,RoadData('road2', vFixpnt))
-# stRaodDataMap.setdefault(3,RoadData('road3', vFixpnt))
-#
-# print (stRaodDataMap[1].name)
-#
-# print ('roadName = {0}'.format(stRaodData.name) )
-# for j in range(len(stRaodData.vFixpnt)):
-# 	print ('fixPntSeq = {0}, xVal = {1}'.format(j, stRaodData.vFixpnt[j].x))

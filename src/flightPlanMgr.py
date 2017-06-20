@@ -1,18 +1,21 @@
 from ..public.scenarioDataObj import *
 from .taxiMap import TaxiMap
 from .flightPlanGen import FlightPlanGen
+from .flightPlan import FlightPlan
+from ..public.dataManage import DataManager
 
 class FlightPlanMgr(object):
-	def __init__(self):
-		self.FlightPlanDic = {} ##格式{ id, 'FlightPlan'}
+	def __init__(self, pDataManager):
+		self.FlightPlanDic = {} ##所有生成的飞行计划数据 格式{ id, 'FlightPlan'}
 		self.curFlightPlanDic = {} ##当前需要参加运算的飞行计划集合
 		self.iCurFlanID = -1
-		self.pTaxiMap = None
+		self.pTaxiMap = TaxiMap(self, pDataManager)
+		self.pDataManage = pDataManager
 	##brief 创建飞行计划
 	def createFlightPlan(self, n):
-		vFlightPlanData = FlightPlanGen.GeneFlightPlan(n)
-		for i in range(len(vFlightPlanData)):
-			pass
+		pFlightPlanLst = FlightPlanGen.geneFlightPlan(n)
+		for i in range(len(pFlightPlanLst)):
+			self.FlightPlanDic.setdefault(pFlightPlanLst[i].getFlightPlanID, pFlightPlanLst[i])
 
 	##1、获取下一个飞行计划，如果为空表示该episode结束，时间根据ID递增
 	##2、判断是否该飞行计划时候是否有飞行计划已经结束并置位
@@ -57,23 +60,25 @@ class FlightPlanMgr(object):
 		while pFlightPlan != None:
 			iStartTime = pFlightPlan.getFlightPlanStartTime()
 			if  iStartTime <= iTime:
-				if self.curFlightPlanDic[iFPlanID] == None:
+				if self.curFlightPlanDic.get(iFPlanID) == None:
 					pFlightPlan.updateFPStatus(ENUM_FP_STATUS.E_STATUS_FUTURE)
 					self.curFlightPlanDic.setdefault(iFPlanID, pFlightPlan)
+					self.pTaxiMap.addFlightPlanPath(pFlightPlan)
 			else:
 				break
 			iFPlanID += 1
 			pFlightPlan = self.getNextFlightPlan(iFPlanID)
 
-	def refreshFlightPlanSet(self):
+	def refreshFlightPlan(self):
 		for k in self.curFlightPlanDic:
 			pFlightPlan = self.FlightPlanDic.get(k)
 			if pFlightPlan.isFlightPlanFin():
-				##删除滑行路线
-				self.pTaxiMap.delFlightPlanPath(pFlightPlan)
+				##删除taxiMap滑行路线
+				self.pTaxiMap.delFlightPlanPath(pFlightPlan.getFlightPlanID())
 				##删除飞行计划
-				del self.FlightPlanDic[k]
-
+				del self.curFlightPlanDic[k]
+		##删除当前的滑行数据
+		self.pTaxiMap.delFlightPlanPath(self.iCurFlanID)
 
 	def isFlightPlanStartByID(self, iFlightPlanID):
 		return  self.FlightPlanDic.get(iFlightPlanID).isFplightPlanStart()

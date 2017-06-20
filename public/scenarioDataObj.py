@@ -29,10 +29,8 @@ class ENUM_FP_TYPE(Enum):
 ##iTaxStartTime->飞机开始滑行时间
 ##iStartPosID->飞行计划起始固定点ID
 ##iEndPosID->飞行计划结束固定点ID
-##bFinished->飞行计划是否结束
-##bbStarted->是否已经开始，没有开始的是未来的数据
 class FlightPlanData(BaseData):
-	_fields = ['iID', 'strName', 'eFlightType','iTaxStartTime', 'iStartPosID', 'iEndPosID', 'bFinished', 'bStarted']
+	_fields = ['iID', 'strName', 'eFlightType','iTaxStartTime', 'iStartPosID', 'iEndPosID']
 
 #####飞行计划集合
 ##vFlightPlan->飞行计划list

@@ -1,5 +1,5 @@
 """
-brief 1、滑行路线和地图节点的更新
+brief 1、滑行路线和地图节点的更新 2、负责有部分冲突的解决
 
 滑行地图结构体类型例子
 taxiPathMap = {iNodeID:[NodeFlightPlanData]}
@@ -19,26 +19,23 @@ class NodeFlightPlanData(BaseData):
 
 ##地图滑行节点类
 class TaxiMap(object):
-	def __init__(self, pDataManager, pFlightPlanMgr):
-		self.taxiNodeDic = {} ## 格式{id:[adjId....], ....}
-		self.taxiPathDic = {} ## 格式{id:[NodeFlightPlanData...]}
+	def __init__(self, pFlightPlanMgr, pDataManager):
+		self.taxiNodeDic = {} ## 每个节点的相邻节点。格式{id:[adjId....], ....}
+		self.taxiPathDic = {} ## 每个节点的滑行数据。格式{id:[NodeFlightPlanData...],....}
 		self.pDataManager = pDataManager
 		self.pFlightPlanMgr = pFlightPlanMgr
 	##brief 初始化基础地图数据
 	def initMapData(self):
 		pass
-	def delFlightPlanPath(self, pFlightPlan):
-		stFlightPlanData = pFlightPlan.getFlightPlanData()
-		stFPPathData = pFlightPlan.getFlightPlanPath()
+	def delFlightPlanPath(self, iFlightPlanID):
 		for i in self.taxiPathDic:
 			delData = []
 			for j in range(len(self.taxiPathDic.get(i))):
 				stNodeFlightPlanData = self.taxiPathDic.get(i)[j]
-				if stNodeFlightPlanData.iFlightPlanID == stFlightPlanData.iID:
+				if stNodeFlightPlanData.iFlightPlanID == iFlightPlanID:
 					delData.append(j)
 			for j in delData:
 				self.taxiPathDic.get(i).remove(delData[j])
-
 
 
 	##brief 添加一个飞行计划路径
