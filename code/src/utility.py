@@ -85,13 +85,17 @@ class UtilityTool(object):
 	# FPPathData:[in] 冲突滑行路线
 	# return iTotalTime返回滑行时间
 	@classmethod
-	def getTotalTaxiTime(cls, iStartTime,FPPathData):
+	def getTotalFPTaxiTime(cls, iStartTime,FPPathData):
 		iTotalTime = 0
 		for i in range(len(FPPathData.vFPPassPntData)):
 			iTotalTime += FPPathData.vFPPassPntData[i].iRealPassTime - iStartTime
 		return  iTotalTime
 
-
+	def getTotalPathTaxiTime(cls,PathData):
+		iTotalTime = 0
+		for i in range(len(PathData.vPassPntData)):
+			iTotalTime += PathData.vPassPntData[i].iRelaPassTime
+		return  iTotalTime
 
 
 

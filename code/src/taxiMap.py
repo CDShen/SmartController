@@ -1,14 +1,15 @@
 """
-brief 1、滑行路线和地图节点的更新 2、负责有部分冲突的解决
+brief 1、滑行路线和地图节点的更新 
+      2、负责有不需要Q函数的冲突解决 
+      3、负责不需要冲突解决的飞行计划滑行更新
 
 滑行地图结构体类型例子
 taxiPathMap = {iNodeID:[NodeFlightPlanData]}
 """
-from .flightPlanMgr import FlightPlanMgr
+
 from ..public.baseDataDef import BaseData
 from ..public.dataManage import DataManager
 from .flightPlan import FlightPlan
-# from .flightPlanMgr import FlightPlanMgr
 
 from math import *
 from .utility import MathUtilityTool
@@ -26,6 +27,12 @@ class TaxiMap(object):
 		self.taxiPathDic = {} ## 每个节点的滑行数据。格式{id:[NodeFlightPlanData...],....}
 		self.pDataManager = pDataManager
 		self.pFlightPlanMgr = pFlightPlanMgr
+		self.iResolveFligtPlanID = -1.0 ##内部可以解决冲突的飞行计划ID
+		self.newFPPathData = None   ##内部可以解决从图的飞行计划新滑行路径
+
+	def clearResolveFlightPlanData(self):
+		self.iResolveFligtPlanID = -1.0
+		self.newFPPathData = None
 	##brief 初始化基础地图数据
 	def initMapData(self):
 		pass
@@ -46,10 +53,9 @@ class TaxiMap(object):
 		stFPPathData = pFlightPlan.getFlightPlanPath()
 		for i in range(len(stFPPathData.vFPPassPntData)):
 			stFPPassPntData = stFPPathData.vFPPassPntData[i]
-
 			stNodeFlightPlanData = NodeFlightPlanData(stFlightPlanData.iID, stFPPassPntData.iRealPassTime)
 			if self.taxiPathDic.get(stFPPassPntData.iFixID) == None:
-				self.taxiPathDic.setdefault(stFPPassPntData.iFixID,[stNodeFlightPlanData])
+				self.taxiPathDic.setdefault(stFPPassPntData.iFixID, [stNodeFlightPlanData])
 			else:
 				self.taxiPathDic.get(stFPPassPntData.iFixID).append(stNodeFlightPlanData)
 
@@ -98,7 +104,7 @@ class TaxiMap(object):
 	##brief 判断当前路线是否有冲突，只返回需要用Q函数需要解决的冲突
 	##ConflictData[out] 返回冲突数据
 	##1、如果当前冲突是当前航班优先，则不认为有冲突
-	def isConflict(self, pFlightPlan, PathData,ConflictData):
+	def isConflict(self, pFlightPlan, PathData,ConflictData, bHasChangePath):
 		bConflict = False
 		vConflictData = [] ##冲突集合，如果冲突集合超过2次，需要警告
 		iStartTime = pFlightPlan.getFlightPlanStartTime()

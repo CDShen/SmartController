@@ -62,8 +62,18 @@ class PathSelect(object):
     def _pathScore(self, PathData):
         ScorePathDic = {'score': None, 'path': None}
         dScore = 0.0
+        path = None
+        ConflictData = None
+        ##
+        if self.pTaxiMap.isConflict(self.pFlightPlan, PathData, ConflictData) == False:
+            dScore = UtilityTool.getTotalPathTaxiTime(PathData)
+            path = PathData
 
-        return
+        else:
+            ##交给Q函数处理
+            pass
+        ScorePathDic['score'] = dScore
+        ScorePathDic['path'] = PathData
 
 
 
