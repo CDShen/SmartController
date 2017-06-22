@@ -64,16 +64,25 @@ class PathSelect(object):
         dScore = 0.0
         path = None
         ConflictData = None
+        bHasChangePath = False #是否现有路线更改
         ##
-        if self.pTaxiMap.isConflict(self.pFlightPlan, PathData, ConflictData) == False:
+        if self.pTaxiMap.isConflict(self.pFlightPlan, PathData, ConflictData, bHasChangePath) == False:
             dScore = UtilityTool.getTotalPathTaxiTime(PathData)
             path = PathData
-
+            ##如果解决冲突更改了现有的滑行路线
+            if bHasChangePath == True:
+                iFlightPlanID = -1
+                FPPathData = None
+                self.pTaxiMap.getResolveFlightPlanData(iFlightPlanID, FPPathData)
+                self.pFlightMgr.getFlightPlanByID(iFlightPlanID).setBestProperPath(FPPathData)
+                self.pTaxiMap.clearResolveFlightPlanData()
         else:
             ##交给Q函数处理
             pass
+
         ScorePathDic['score'] = dScore
         ScorePathDic['path'] = PathData
+
 
 
 

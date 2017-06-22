@@ -21,6 +21,12 @@ class E_FIXPOINT_CONF_TYPE(Enum):
 	E_FIXPOINT_CONF_DEP = 2  ##离港优先
 
 
+class E_CONFLICT_TYPE(Enum):
+	E_CONFLICT_CONS = 0  ##顺向冲突0-30°
+	E_CONFLICT_CROSS = 1  ##交叉冲突30-150°
+	E_CONFLICT_OPP = 2  ##对头冲突150-180°
+
+
 class FixPointData(BaseData):
 	_fields = ['iID', 'strName', 'dX', 'dY','eConflictType']
 

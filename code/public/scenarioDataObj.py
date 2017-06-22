@@ -86,9 +86,11 @@ class FPPathDataSet(BaseData):
 ##iConflictFixID->冲突固定点ID
 ##iCurPathID->当前计划的冲突路线ID
 ##iConPathID->冲突计划的滑行路线ID
-
+##iFirstPassTime->当前计划过冲突点时间
+##iSecOndPassTime->冲突计划过冲突点时间
 class ConflictData(BaseData):
-	_fields = ['iCurFPID', 'iConfFPID', 'eConfType', 'efixPntType', 'iConflictFixID', 'iCurPathID', 'iConPathID']
+	_fields = ['iCurFPID', 'iConfFPID', 'eConfType', 'efixPntType', 'iConflictFixID',\
+	           'iCurPathID', 'iConPathID', 'iFirstPassTime', 'iSecondPassTime']
 
 
 
@@ -98,6 +100,11 @@ class ConflictData(BaseData):
 class CguPos(BaseData):
 	_fields = ['x','y']
 
+
+class E_RESOLVE_TYPE(Enum):
+	E_RESOLVE_NONE = 1  ##不需要处理冲突
+	E_RESOLVE_INNER = 2  ##内部解决冲突
+	E_RESOLVE_QFUN = 3  ##通过Q函数解决
 
 
 

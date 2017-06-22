@@ -13,6 +13,8 @@ class FlightPlan(object):
 	#brief获取最佳的滑行路线
 	def setBestProperPath(self, FPPathData):
 		self.FPPathData = FPPathData
+	def getFlightPlanPath(self):
+		return self.FPPathData
 
 	def getFlightPlanData(self):
 		return self.FlightPlanData
