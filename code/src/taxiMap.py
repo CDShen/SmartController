@@ -12,10 +12,12 @@ from ..public.dataManage import DataManager
 from .flightPlan import FlightPlan
 from ..public.scenarioDataObj import *
 from ..public.dataObj import *
+from .utility import *
 
 from math import *
 from .utility import MathUtilityTool
 from ..public.dataObj import *
+from ..public.publicParaDef import PublicParaDef
 
 
 class NodeFlightPlanData(BaseData):
@@ -35,9 +37,8 @@ class TaxiMap(object):
 	def clearResolveFlightPlanData(self):
 		self.iResolveFligtPlanID = -1.0
 		self.newFPPathData = None
-	def getResolveFlightPlanData(self, iFlightPlanID, newFPPathData):
-		iFlightPlanID = self.iResolveFligtPlanID
-		newFPPathData = self.newFPPathData
+	def getResolveFlightPlanData(self):
+		return  self.iResolveFligtPlanID, self.newFPPathData
 
 	##brief 初始化基础地图数据
 	def initMapData(self):
@@ -77,13 +78,24 @@ class TaxiMap(object):
 		eCurFlightPlanType = pFlightPlan.getFlightType()
 		eConFlightPlanType = pConFlightPlan.getFlightType()
 		iFirstPassTime = ConflictData.iFirstPassTime
-		iSecOndPassTime = ConflictData.iSecOndPassTime
+		iSecondPassTime = ConflictData.iSecondPassTime
 		eConFixType = ConflictData.efixPntType
 		bIsFuturePlan = pConFlightPlan.isFutureFlightPlan()
+		iStartTime = pFlightPlan.getFlightPlanStartTime()
+
+		##将PathData数据转化为FPPathData
+		stFPPathData = FPPathData(PathData.iPathID, [])
+		for i in range(len(PathData.vPassPntData)):
+			stFixPntData = self.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID)
+			stFPPassPntData = FPPassPntData(PathData.vPassPntData[i].iFixID, iStartTime + PathData.vPassPntData.iRelaPassTime, \
+			                                stFixPntData.x, stFixPntData.y, ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL)
+			stFPPathData.vFPPassPntData.append(stFPPassPntData)
+
+
 		if eCurFlightPlanType == eConFlightPlanType or\
 			(eCurFlightPlanType != eConFlightPlanType and eConFixType.value == E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_FIFS):
 
-			if iFirstPassTime > iSecOndPassTime:
+			if iFirstPassTime > iSecondPassTime:
 				##需要Q函数处理
 				return E_RESOLVE_TYPE.E_RESOLVE_QFUN
 			else:
@@ -92,6 +104,10 @@ class TaxiMap(object):
 					return E_RESOLVE_TYPE.E_RESOLVE_NONE
 				else:
 					##调用公共函数解决冲突
+					newPath = None
+					UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData, newPath)
+					self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
+					self.newFPPathData = newPath
 					return E_RESOLVE_TYPE.E_RESOLVE_INNER
 
 		elif eCurFlightPlanType != eConFlightPlanType and eCurFlightPlanType.value == eConFixType.value:
@@ -100,6 +116,10 @@ class TaxiMap(object):
 				return E_RESOLVE_TYPE.E_RESOLVE_NONE
 			else:
 				##调用公共函数解决冲突
+				newPath = None
+				UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData, newPath)
+				self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
+				self.newFPPathData = newPath
 				return E_RESOLVE_TYPE.E_RESOLVE_INNER
 
 		elif eCurFlightPlanType != eConFlightPlanType and eConFlightPlanType.value == eConFixType.value:
@@ -110,15 +130,16 @@ class TaxiMap(object):
 
 
 	##brief 判断当前路线是否有冲突，只返回需要用Q函数需要解决的冲突
-	##pFlightPlan 当前飞行计划
-	##PathData  当前滑行数据
-	##ConflictData 冲突数据
-	##bHasChangePath 是否解决冲突过程中改变了计划滑行路线
-	##ConflictData[out] 返回冲突数据
+	##pFlightPlan[in] 当前飞行计划
+	##PathData[in]  当前滑行数据
+	##eResolveType[out] 解决冲突类型
+	##ConflictData[out] 冲突数据
 	##1、如果当前冲突是当前航班优先，则不认为有冲突
-	def isConflict(self, pFlightPlan, PathData,ConflictData, bHasChangePath):
+	def calConflictType(self, pFlightPlan, PathData):
+		stConflictData = None
+		eResolveType = None
+
 		iCountNum = 0
-		bConflict = False
 		vConflictData = [] ##冲突集合，如果冲突集合超过2次，需要警告
 		iStartTime = pFlightPlan.getFlightPlanStartTime()
 		for i in range(len(PathData.vPassPntData)-1):
@@ -158,25 +179,28 @@ class TaxiMap(object):
 							iConFlightPlanID = TmpNodeFlightPlanDataLst[k][0].iFlightPlanID
 							pConFlightPlan = self.pFlightPlanMgr.getFlightPlanData(iConFlightPlanID)
 							eFixPntType = self.pDataManager.getFixPntConType(stNextPassPntData.iFixID)
-							iConFixID = pConFlightPlan.getFlightPlanPath().iFixID
-							iCurFixID = pFlightPlan.getFlightPlanPath().iFixID
+							iCurPathID = PathData.iPathID
+							iConPathID = pConFlightPlan.getFlightPlanPath().iPathID
+
 							iFirstPassTime = iFirstTimeNext
 							iSecondPassTime = iSecondTime
 							iCountNum+=1
 							if iCountNum == 2:
 								##添加日志
 								pass
-							ConflictData = ConflictData(pFlightPlan.getFlightPlanID(),iConFlightPlanID,\
-							E_CONFLICT_TYPE.E_CONFLICT_CROSS,eFixPntType ,stNextPassPntData.iFixID,PathData.iPathID, \
-							)
-							self._judgeNeedQFunResolveCon(pFlightPlan, PathData, pConFlightPlan,ConflictData )
+							stConflictData = ConflictData(pFlightPlan.getFlightPlanID(),iConFlightPlanID,\
+							E_CONFLICT_TYPE.E_CONFLICT_CROSS,eFixPntType ,stNextPassPntData.iFixID,iCurPathID, \
+							iConPathID, iFirstPassTime, iSecondPassTime  )
 							##有冲突，继续判断是否需要Q函数解决
+							return  self._judgeNeedQFunResolveCon(pFlightPlan, PathData,\
+							        pConFlightPlan,stConflictData), stConflictData
+
 
 
 
 					pass
-				##如果不相等
-				else:
+				##如果后续节点不相等
+				else: ##  AdjNodeLst[j] == stPassPntData.iFixID:
 					AdjNodeFlightPlanDataLst = self.getNodePassPnt(AdjNodeLst[j])
 					TmpNodeFlightPlanDataLst = []
 					for k in range(len(AdjNodeFlightPlanDataLst)):
@@ -187,20 +211,6 @@ class TaxiMap(object):
 					##比较
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iPassTime = iStartTime + stNextPassPntData.iRelaPassTime
-						if fabs(iPassTime - TmpNodeFlightPlanDataLst.iRealPassTime) < 10:
+						if fabs(iPassTime - TmpNodeFlightPlanDataLst.iRealPassTime) < PublicParaDef.iConFlictTimeThread:
 							##有冲突，继续判断是否需要Q函数解决
 							pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-

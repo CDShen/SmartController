@@ -1,5 +1,5 @@
 from .pathSelect import PathSelect
-
+from ..public.publicParaDef import PublicParaDef
 
 
 
@@ -15,7 +15,6 @@ class LearnWorkState(ControllerWorkState):
 	def __init__(self, pFlightMgr):
 		self.pFlightMgr = pFlightMgr
 		self.pPathSelect = PathSelect(pFlightMgr)
-		self.iFutureMin = 10 ##未来N分钟的时间
 
 	##brief 初始化
 	def init(self):
@@ -45,7 +44,7 @@ class LearnWorkState(ControllerWorkState):
 				##更新此时刻的飞行计划状态
 				self._updateFlightPlan(iTime)
 				##将此计划N分钟后的飞行计划加入集合和去除已经完成的飞行计划
-				self._addFutureFlightPlan(iTime + self.iFutureMin*60)
+				self._addFutureFlightPlan(iTime + PublicParaDef.iFutureTimeMin*60)
 				self._refreshFlightPlan()
 				##对合法路径进行打分、更新Q值后加入集合
 				self.pPathSelect.setCurFlightPlan(pNextFlightPlan)

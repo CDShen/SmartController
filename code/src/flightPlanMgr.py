@@ -49,11 +49,6 @@ class FlightPlanMgr(object):
 	def getFlightPlanByID(self, iFPlanID):
 		return self.FlightPlanPathDic.get(iFPlanID)
 
-
-	def setBestProperPath(self, iFPlanID, FPPathData):
-		FlightPlanPath = self.getFlightPlanByID(iFPlanID)
-		FlightPlanPath.FPPathData = FPPathData
-
 	def addFutureFlightPlan(self, iTime):
 		iFPlanID = self.iCurFlanID
 		pFlightPlan = self.getNextFlightPlan(iFPlanID)

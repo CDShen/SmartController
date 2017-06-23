@@ -6,6 +6,7 @@ from ..public.dataManage import DataManager
 from .utility import UtilityTool
 from .flightPlan import FlightPlan
 from .taxiMap import TaxiMap
+from ..public.scenarioDataObj import *
 
 class PathSelect(object):
     def __init__(self, dThresholdScore, pFlightMgr):
@@ -63,20 +64,23 @@ class PathSelect(object):
         ScorePathDic = {'score': None, 'path': None}
         dScore = 0.0
         path = None
-        ConflictData = None
+
         bHasChangePath = False #是否现有路线更改
         ##
-        if self.pTaxiMap.isConflict(self.pFlightPlan, PathData, ConflictData, bHasChangePath) == False:
+
+
+        eResolveType, ConflictData  = self.pTaxiMap.calConflictType(self.pFlightPlan, PathData)
+        if eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_NONE.value:
             dScore = UtilityTool.getTotalPathTaxiTime(PathData)
             path = PathData
-            ##如果解决冲突更改了现有的滑行路线
-            if bHasChangePath == True:
-                iFlightPlanID = -1
-                FPPathData = None
-                self.pTaxiMap.getResolveFlightPlanData(iFlightPlanID, FPPathData)
-                self.pFlightMgr.getFlightPlanByID(iFlightPlanID).setBestProperPath(FPPathData)
-                self.pTaxiMap.clearResolveFlightPlanData()
-        else:
+
+        elif eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_INNER.value:
+            iFlightPlanID, FPPathData =  self.pTaxiMap.getResolveFlightPlanData()
+            self.pFlightMgr.getFlightPlanByID(iFlightPlanID).setBestProperPath(FPPathData)
+            self.pTaxiMap.clearResolveFlightPlanData()
+            dScore = UtilityTool.getTotalPathTaxiTime(PathData)
+            path = PathData
+        elif eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_QFUN.value:
             ##交给Q函数处理
             pass
 

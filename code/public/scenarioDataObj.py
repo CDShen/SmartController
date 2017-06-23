@@ -72,10 +72,6 @@ class FPPathData(BaseData):
 class FlightPlanPathData(BaseData):
 	_fields = ['FlightPlanData', 'FPPathData']
 
-#####最终滑行路线集合
-##vFPPathDataSet->最终飞行计划和路径list
-class FPPathDataSet(BaseData):
-	_fields = ['vFPPathDataSet']
 
 
 ####冲突结果

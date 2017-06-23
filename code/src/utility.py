@@ -97,22 +97,20 @@ class UtilityTool(object):
 				stFPPassPntData = conFPPathData.vFPPassPntData[i]
 				stFPPassPntData.iRealPassTime += iDiffTime
 
-	# brief:解决冲突并返回冲突后的路径
-	# iStartTime:[in] 当前计划滑行路线
+	# brief:解决冲突并返回冲突后的路径滑行时间
+	# iStartTime:[in] 当前开始滑行时间
 	# FPPathData:[in] 冲突滑行路线
-	# return iTotalTime返回滑行时间
+	# return 返回滑行时间
 	@classmethod
 	def getTotalFPTaxiTime(cls, iStartTime,FPPathData):
-		iTotalTime = 0
-		for i in range(len(FPPathData.vFPPassPntData)):
-			iTotalTime += FPPathData.vFPPassPntData[i].iRealPassTime - iStartTime
-		return  iTotalTime
+		return  FPPathData.vFPPassPntData[len(FPPathData.vFPPassPntData)-1].iRealPassTime - iStartTime
 
+	# brief:计划滑行路径总时间
+	# PathData:[in] 当前计划滑行路线
+	# return 返回滑行时间
+	@classmethod
 	def getTotalPathTaxiTime(cls,PathData):
-		iTotalTime = 0
-		for i in range(len(PathData.vPassPntData)):
-			iTotalTime += PathData.vPassPntData[i].iRelaPassTime
-		return  iTotalTime
+		return PathData.vPassPntData[len(PathData.vPassPntData)-1].iRelaPassTime
 
 	@classmethod
 	def getConflictType(cls, cguPos1_1,cguPos1_2, cguPos2_1, cguPos2_2):
