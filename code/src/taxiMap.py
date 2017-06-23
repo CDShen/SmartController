@@ -195,20 +195,21 @@ class TaxiMap(object):
 							return  self._judgeNeedQFunResolveCon(pFlightPlan, PathData,\
 							        pConFlightPlan,stConflictData), stConflictData
 
-
-
-
-					pass
 				##如果后续节点不相等
 				else: ##  AdjNodeLst[j] == stPassPntData.iFixID:
 					AdjNodeFlightPlanDataLst = self.getNodePassPnt(AdjNodeLst[j])
 					TmpNodeFlightPlanDataLst = []
 					for k in range(len(AdjNodeFlightPlanDataLst)):
 						for m in range(len(NodeFlightPlanDataLst)):
+							##当前后两个节点飞行计划相同时候纳入考虑
 							if NodeFlightPlanDataLst[m].iFlightPlanID == AdjNodeFlightPlanDataLst[k].iFlightPlanID:
 								TmpNodeFlightPlanDataLst.append(AdjNodeFlightPlanDataLst[k])
 
-					##比较
+					##如果超过两个告警
+					if len(TmpNodeFlightPlanDataLst) >= 2:
+						##如果超过两个告警
+						pass
+
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iPassTime = iStartTime + stNextPassPntData.iRelaPassTime
 						if fabs(iPassTime - TmpNodeFlightPlanDataLst.iRealPassTime) < PublicParaDef.iConFlictTimeThread:
