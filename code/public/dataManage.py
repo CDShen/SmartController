@@ -5,6 +5,7 @@ from .dataObj import *
 
 ##brief 数据管理类
 class DataManager(object):
+    QStateActionScoreDataLst = []
     FixPointDataDic = {}
     def init(self):
         bInit = True
@@ -13,8 +14,8 @@ class DataManager(object):
         vPathData = None
         return vPathData
     def getFixPntConType(self, iFixPntID):
-        efixPntType = E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_ARR
-        return efixPntType
+        eFixPntType = E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_ARR
+        return eFixPntType
     def getMaxUseValPath(self, iStartID, iEndID):
         vPathData = self.getFlightPlanAllPath(iStartID, iEndID)
         iUseMaxNum = -1
@@ -31,3 +32,18 @@ class DataManager(object):
     def saveData(self):
         bSucess = True
         return  bSucess
+
+    def findQState(self, QStateData):
+        bFind = False
+        QStateActionScoreDataLst = []
+        iCount = 0
+        for i in range(len(self.QStateActionScoreDataLst)):
+            stQStateData = self.QStateActionScoreDataLst[i].QStateActionScoreData.QStateData
+            if stQStateData == QStateData:
+                QStateActionScoreDataLst.append(QStateActionScoreDataLst[i])
+                iCount += 1
+                if iCount == 2:
+                    bFind = True
+                    return bFind, QStateActionScoreDataLst
+
+        return bFind, QStateActionScoreDataLst

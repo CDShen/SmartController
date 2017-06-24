@@ -1,5 +1,5 @@
 from .pathSelect import PathSelect
-from ..public.publicParaDef import PublicParaDef
+from ..public.config import ConfigReader
 
 
 
@@ -44,7 +44,7 @@ class LearnWorkState(ControllerWorkState):
 				##更新此时刻的飞行计划状态
 				self._updateFlightPlan(iTime)
 				##将此计划N分钟后的飞行计划加入集合和去除已经完成的飞行计划
-				self._addFutureFlightPlan(iTime + PublicParaDef.iFutureTimeMin*60)
+				self._addFutureFlightPlan(iTime + ConfigReader.iFutureTimeMin*60)
 				self._refreshFlightPlan()
 				##对合法路径进行打分、更新Q值后加入集合
 				self.pPathSelect.setCurFlightPlan(pNextFlightPlan)

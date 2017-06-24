@@ -19,10 +19,11 @@ class B(object):
         return b
 
 
-b = 7
-if 1==1:
-    b = 5
-print (b)
+a = [1,2,3]
+b = [2,3]
+
+a.append(b)
+print (a)
 
 
 

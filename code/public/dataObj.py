@@ -90,22 +90,28 @@ class ENUM_QACTION_TYPE(Enum):
 ##eConFlightType->冲突航班类型 0：其他 1：进港 2：离港
 ##eConflictType->冲突类型 1:对头冲突 2：交叉冲突 
 ##iPathID->滑行道路的编号ID
+##iConPathID->冲突滑行道ID
 class QStateData(BaseData):
 	_fields = ['iStartFixID', 'iEndFixID','iConflictFixID', 'efixPntType','eCurFlightType','eConFlightType'\
-	,'eConflictType', 'iPathID']
-
-
-##########Q状态分数
-##iStartFixID->起始固定点ID
-##iEndFixID->结束固定点ID
-##iConflictFixID->冲突位置固定点ID
-##efixPntType->冲突固定点类型
-##eCurFlightType->当前航班类型
-##eConFlightType->冲突航班类型
-##eConflictType->冲突类型 1:对头冲突 2：交叉冲突 
-##iPathID->滑行道路的编号ID
-##eActionType->采取的动作
-##dScore->Q学习后的分数
+	,'eConflictType', 'iPathID', 'iConPathID']
+	def __eq__(self, other):
+		if self.iStartFixID    == other.iStartFixID and \
+		   self.iEndFixID      == other.iEndFixID and \
+		   self.iConflictFixID == other.iConflictFixID and \
+		   self.efixPntType    == other.efixPntType and \
+		   self.eCurFlightType == other.eCurFlightType and \
+		   self.eConFlightType == other.eConFlightType and \
+		   self.eConflictType  == other.eConflictType and \
+		   self.iPathID        == other.iPathID and \
+		   self.iConPathID     == other.iConPathID:
+			return True
+		else:
+			return False
+				##########Q状态分数
+##iQActionID->唯一Q
+##QStateData->结束固定点ID
+##QActionData->冲突位置固定点ID
+##dScore->冲突固定点类型
 class QStateActionScoreData(BaseData):
 	_fields = ['QStateData', 'QActionData','dScore']
 

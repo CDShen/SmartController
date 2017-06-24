@@ -6,6 +6,7 @@ from ..public.dataManage import DataManager
 from .utility import UtilityTool
 from .flightPlan import FlightPlan
 from .taxiMap import TaxiMap
+from .qLearnCore import QLearnFunction
 from ..public.scenarioDataObj import *
 
 class PathSelect(object):
@@ -15,6 +16,7 @@ class PathSelect(object):
         self.pTaxiMap = pFlightMgr.pTaxiMap
         self.pFlightMgr = pFlightMgr
         self.pDataManage = pFlightMgr.pDataManage
+        self.pQLearnFunction = QLearnFunction(pFlightMgr)
 
     def setCurFlightPlan(self, pFlightPlan):
         self.pFlightPlan = pFlightPlan
@@ -82,10 +84,12 @@ class PathSelect(object):
             path = PathData
         elif eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_QFUN.value:
             ##交给Q函数处理
+            pConFlightPlan = self.pFlightMgr.getFlightPlanByID(ConflictData.iConfFPID)
+            dScore, path = self.pQLearnFunction.pathSelect(self.pFlightPlan, PathData, pConFlightPlan, ConflictData)
             pass
 
         ScorePathDic['score'] = dScore
-        ScorePathDic['path'] = PathData
+        ScorePathDic['path'] = path
 
 
 

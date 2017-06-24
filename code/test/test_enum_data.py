@@ -5,3 +5,5 @@ class Animal(Enum):
 	dog = 2
 
 
+for i in Animal:
+	print (i)

@@ -36,13 +36,7 @@ class UtilityTool(object):
 	dTheta = None
 	pDataManager = None
 
-	# brief:输入当前的计划，返回历史使用概率最高滑行路径
-	# FlightPlanData:[in] 未来N时刻的飞行计划数据
-	# vPassPntTimeData:[out] 未来N时刻的飞行计划过点时间
-	# return:无
-	@classmethod
-	def predict_pass_time(cls, FlightPlanData, FPPathData):
-		pass
+
 
 
 	# brief:解决冲突并返回冲突后的路径，只考虑改变冲突路线的方式
