@@ -9,12 +9,14 @@ from .baseDataDef import BaseData
 ##dThresholdScore->最小分数
 ##iFutureTimeMin->考虑未来航班分钟数
 ##iConflictTimeThread->冲突判断门限阈值
-##dBeta->学习因子
+##dBeta->Q学习权重
+##dBeta->Q学习冲突时间和历史时间的权重
+
 ##remark
 
 class ConfigReader(BaseData):
 	_fields = ['iFlightPlanNum','iWorkState','bNeedShow', 'iStepCount',\
-	           'dThresholdScore', 'iFutureTimeMin', 'iConflictTimeThread','dBeta']
+	           'dThresholdScore', 'iFutureTimeMin', 'iConflictTimeThread','dBeta','dTheta']
 
 	@classmethod
 	def loadConfig(cls):

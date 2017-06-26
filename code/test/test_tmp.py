@@ -17,13 +17,20 @@ class B(object):
         # d = [1,2,3]
         b= d
         return b
+    def changeData(self):
+        data = self.data[3]
+        data[0] = 7
 
 
-a = [1,2,3]
-b = [2,3]
+a = A()
+a.data = [1,2,3,[4,5]]
 
-a.append(b)
-print (a)
+b = B(a)
+
+print (b.data)
+b.changeData()
+print(b.data)
+
 
 
 

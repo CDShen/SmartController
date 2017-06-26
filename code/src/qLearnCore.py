@@ -35,9 +35,12 @@ class QLearnFunction(LearnFunction):
 	# return 最高分数
 	def getScore(self, state, path):
 		pass
+	##breif:Q学习回报函数
+	##remark:目前Q只是回报只处理当前飞机的滑行路线
 	def _reward(self, QStateData, eActionType, PathData, ConflictData):
 		newPath = None
 		dReward = 0.0
+
 		return  dReward, newPath
 	##brief 更新Q值并返回分数和路线
 	##warn:注意是否能通过引用方式更新值
@@ -47,10 +50,9 @@ class QLearnFunction(LearnFunction):
 		newPath = None
 		QStateData = QStateActionScoreData.QStateData
 		eActionType = QStateActionScoreData.QActionData
-		dOldScore = QStateActionScoreData.dScore
 		dReward ,newPath = self._reward(QStateData, eActionType, PathData, ConflictData)
 
-		QStateActionScoreData.dScore = dOldScore *(1.0-self.beta) + self.beta*dReward
+		QStateActionScoreData.dScore = QStateActionScoreData.dScore *(1.0-self.beta) + self.beta*dReward
 		ScorePathDic['score'] = QStateActionScoreData.dScore
 		ScorePathDic['path'] = newPath
 		return ScorePathDic
