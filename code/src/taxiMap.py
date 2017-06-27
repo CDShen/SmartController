@@ -15,7 +15,6 @@ from ..public.dataObj import *
 from .utility import *
 
 from math import *
-from .utility import MathUtilityTool
 from ..public.dataObj import *
 from ..public.config import ConfigReader
 
@@ -82,14 +81,10 @@ class TaxiMap(object):
 		eConFixType = ConflictData.efixPntType
 		bIsFuturePlan = pConFlightPlan.isFutureFlightPlan()
 		iStartTime = pFlightPlan.getFlightPlanStartTime()
+		newPath = None
 
 		##将PathData数据转化为FPPathData
-		stFPPathData = FPPathData(PathData.iPathID, [])
-		for i in range(len(PathData.vPassPntData)):
-			stFixPntData = self.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID)
-			stFPPassPntData = FPPassPntData(PathData.vPassPntData[i].iFixID, iStartTime + PathData.vPassPntData.iRelaPassTime, \
-			                                stFixPntData.x, stFixPntData.y, ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL)
-			stFPPathData.vFPPassPntData.append(stFPPassPntData)
+		stFPPathData = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 
 
 		if eCurFlightPlanType == eConFlightPlanType or\
@@ -104,8 +99,7 @@ class TaxiMap(object):
 					return E_RESOLVE_TYPE.E_RESOLVE_NONE
 				else:
 					##调用公共函数解决冲突
-					newPath = None
-					UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData, newPath)
+					newPath = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
 					self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
 					self.newFPPathData = newPath
 					return E_RESOLVE_TYPE.E_RESOLVE_INNER
@@ -116,8 +110,7 @@ class TaxiMap(object):
 				return E_RESOLVE_TYPE.E_RESOLVE_NONE
 			else:
 				##调用公共函数解决冲突
-				newPath = None
-				UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData, newPath)
+				newPath = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
 				self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
 				self.newFPPathData = newPath
 				return E_RESOLVE_TYPE.E_RESOLVE_INNER

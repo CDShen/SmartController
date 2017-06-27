@@ -8,7 +8,7 @@ print (__doc__)
 
 from math import *
 from ..public.dataObj import *
-from ..public.scenarioDataObj import CguPos
+from ..public.scenarioDataObj import *
 from ..public.dataManage import DataManager
 import copy
 
@@ -43,10 +43,13 @@ class UtilityTool(object):
 	# curFPPathData:[in] 当前计划滑行路线
 	# conFPPathData:[in] 冲突滑行路线
 	# ConflictData:[in] 冲突数据
-	# newPath:[out] 解决后新的滑行路线
+	# return newPath:[out] 解决后新的滑行路线
 	# warning
 	@classmethod
-	def resolveConflict(cls, curFPathData, conFPPathData ,ConflictData, newPath):
+	def resolveConflict(cls, curFPathData, conFPPathData ,ConflictData):
+		newPath = copy.deepcopy(conFPPathData)
+		##清空lst
+		newPath.vFPPassPntData = []
 		iConFixID = ConflictData.iConflictFixID
 		iFirstStartIndex = -1
 		iSecondStartFixIDIndex = -1
@@ -79,7 +82,6 @@ class UtilityTool(object):
 		for i in range(len(conFPPathData.vFPPassPntData)):
 			if i < iSecCommonStartIndex:
 				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
-				pass
 			elif i == iSecCommonStartIndex:
 				stFPPassPntData = conFPPathData.vFPPassPntData[i]
 				iOrgTime = conFPPathData.vFPPassPntData[i].iRealPassTime
@@ -90,13 +92,14 @@ class UtilityTool(object):
 			else:
 				stFPPassPntData = conFPPathData.vFPPassPntData[i]
 				stFPPassPntData.iRealPassTime += iDiffTime
-
+				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+		return newPath
 	# brief:解决冲突并返回冲突后的路径滑行时间
 	# iStartTime:[in] 当前开始滑行时间
 	# FPPathData:[in] 冲突滑行路线
 	# return 返回滑行时间
 	@classmethod
-	def getTotalFPTaxiTime(cls, iStartTime,FPPathData):
+	def getTotalFPTaxiTime(cls, iStartTime, FPPathData):
 		return  FPPathData.vFPPassPntData[len(FPPathData.vFPPassPntData)-1].iRealPassTime - iStartTime
 
 	# brief:计划滑行路径总时间
@@ -124,5 +127,19 @@ class UtilityTool(object):
 			eConflictType = E_CONFLICT_TYPE.E_CONFLICT_OPP
 
 		return  eConflictType
+
+
+	def transPathData2FPPathData(self, iStartTime, PathData):
+		vstFPPassPntData = []
+		for i in range(len(PathData.vPassPntData)):
+			stFixPointData = self.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID)
+			stFPPassPntData = FPPassPntData(stFixPointData.iFixID,iStartTime + PathData.vPassPntData[i].iRelaPassTime,\
+			                stFixPointData.dX, stFixPointData.dY,ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL)
+			vstFPPassPntData.append(stFPPassPntData)
+
+			stFPPathData = FPPathData(PathData.iPathID, vstFPPassPntData)
+			return  stFPPathData
+
+
 
 

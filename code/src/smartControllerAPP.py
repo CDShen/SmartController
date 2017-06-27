@@ -2,6 +2,7 @@ from ..public.dataManage import DataManager
 from ..public.config import ConfigReader
 from .flightPlanMgr import FlightPlanMgr
 from .controllerWorkState import *
+from .utility import UtilityTool
 
 class SmartControllerAPP(object):
     def __init__(self):
@@ -31,6 +32,10 @@ class SmartControllerAPP(object):
         elif ConfigReader.iWorkState == 2:
             ##其他工作模式
             pass
+
+        ##公共转换中需要DataManager获取某些数据
+        UtilityTool.pDataManager = self.pDataManager
+
         return bSucess
 
     def run(self):

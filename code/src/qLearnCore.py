@@ -4,6 +4,7 @@ from ..public.dataManage import DataManager
 from ..public.config import ConfigReader
 from ..public.baseDataDef import BaseData
 from ..public.dataObj import *
+from .flightPlan import FlightPlan
 from enum import Enum
 
 # class E_QDataStateType(Enum):
@@ -30,6 +31,10 @@ class QLearnFunction(LearnFunction):
 		self.dBeta =ConfigReader.dBeta
 		self.QStateActionScoreDataLst = None
 		self.pDataManager = pDataManager
+		self.pFlightPlan = FlightPlan
+
+	def setCurFlightPlan(self, pFlightPlan):
+		self.pFlightPlan = pFlightPlan
 	# state[in] 冲突状态
 	# path[out] 最高分数的滑行路线
 	# return 最高分数
@@ -38,23 +43,27 @@ class QLearnFunction(LearnFunction):
 	##breif:Q学习回报函数
 	##remark:目前Q只是回报只处理当前飞机的滑行路线
 	def _reward(self, QStateData, eActionType, PathData, ConflictData):
-		newPath = None
+		FPPath = None
 		dReward = 0.0
 
-		return  dReward, newPath
+
+
+		return  dReward, FPPath
 	##brief 更新Q值并返回分数和路线
 	##warn:注意是否能通过引用方式更新值
 	def _updateQValue(self, QStateActionScoreData, PathData, ConflictData):
-		ScorePathDic = {'score': None, 'path': None}
-		dScore = 0.0
-		newPath = None
+		ScorePathDic = {'score': None, 'orgPath': None, 'FPPath':None}
+		score = 0.0
+		orgPath = PathData
+		FPPath = None
 		QStateData = QStateActionScoreData.QStateData
 		eActionType = QStateActionScoreData.QActionData
-		dReward ,newPath = self._reward(QStateData, eActionType, PathData, ConflictData)
+		dReward ,FPPath = self._reward(QStateData, eActionType, PathData, ConflictData)
 
 		QStateActionScoreData.dScore = QStateActionScoreData.dScore *(1.0-self.beta) + self.beta*dReward
 		ScorePathDic['score'] = QStateActionScoreData.dScore
-		ScorePathDic['path'] = newPath
+		ScorePathDic['path'] = orgPath
+		ScorePathDic['FPPath'] = FPPath
 		return ScorePathDic
 
 	def _getQValue(self, state, action):
@@ -139,7 +148,8 @@ class QLearnFunction(LearnFunction):
 
 		dMaxScore = ScorePathDicLst[0].get('score')
 		bestPath = ScorePathDicLst[0].get('path')
-		return dMaxScore,bestPath
+		dFPPath = None
+		return dMaxScore,bestPath,dFPPath
 
 
 

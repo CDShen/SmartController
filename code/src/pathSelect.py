@@ -50,7 +50,7 @@ class PathSelect(object):
 
 
         dMaxScore = ScorePathLst[0].get('score')
-        bestProperPath = ScorePathLst[0].get('path')
+        bestProperFPPath = ScorePathLst[0].get('FPPath')
 
         ##如果分数小于阈值，重新寻路获取值
         if dMaxScore < self.dThresholdScore:
@@ -58,38 +58,41 @@ class PathSelect(object):
             ##添加错误信息
             pass
         else:
-            self.pFlightPlan.setBestProperPath(bestProperPath)
+            self.pFlightPlan.setBestProperPath(bestProperFPPath)
 
 
     ##返回dict
     def _pathScore(self, PathData):
-        ScorePathDic = {'score': None, 'path': None}
+        iStartTime = self.pFlightPlan.getFlightPlanStartTime()
+        ScorePathDic = {'score': None, 'orgPath': None,'FPPath': None}
         dScore = 0.0
-        path = None
-
-        bHasChangePath = False #是否现有路线更改
-        ##
-
+        orgPath = None
+        FPPath = None
 
         eResolveType, ConflictData  = self.pTaxiMap.calConflictType(self.pFlightPlan, PathData)
         if eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_NONE.value:
             dScore = UtilityTool.getTotalPathTaxiTime(PathData)
-            path = PathData
+            orgPath = PathData
+            FPPath = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 
         elif eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_INNER.value:
             iFlightPlanID, FPPathData =  self.pTaxiMap.getResolveFlightPlanData()
             self.pFlightMgr.getFlightPlanByID(iFlightPlanID).setBestProperPath(FPPathData)
             self.pTaxiMap.clearResolveFlightPlanData()
             dScore = UtilityTool.getTotalPathTaxiTime(PathData)
-            path = PathData
+            orgPath = PathData
+            FPPath = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
+
         elif eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_QFUN.value:
             ##交给Q函数处理
+            self.pQLearnFunction.setCurFlightPlan(self.pFlightPlan)
             pConFlightPlan = self.pFlightMgr.getFlightPlanByID(ConflictData.iConfFPID)
-            dScore, path = self.pQLearnFunction.pathSelect(self.pFlightPlan, PathData, pConFlightPlan, ConflictData)
-            pass
+            dScore, orgPath ,FPPath= self.pQLearnFunction.pathSelect(self.pFlightPlan, PathData, pConFlightPlan, ConflictData)
 
         ScorePathDic['score'] = dScore
-        ScorePathDic['path'] = path
+        ScorePathDic['orgPath'] = orgPath
+        ScorePathDic['FPPath'] = FPPath
+        return  ScorePathDic
 
 
 

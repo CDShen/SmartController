@@ -47,3 +47,6 @@ class DataManager(object):
                     return bFind, QStateActionScoreDataLst
 
         return bFind, QStateActionScoreDataLst
+
+
+
