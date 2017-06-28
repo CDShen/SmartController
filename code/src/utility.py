@@ -94,6 +94,56 @@ class UtilityTool(object):
 				stFPPassPntData.iRealPassTime += iDiffTime
 				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
 		return newPath
+
+	@classmethod
+	def resolveConflictByAction(cls, curFPathData, conFPPathData ,ConflictData):
+		newPath = copy.deepcopy(conFPPathData)
+		##清空lst
+		newPath.vFPPassPntData = []
+		iConFixID = ConflictData.iConflictFixID
+		iFirstStartIndex = -1
+		iSecondStartFixIDIndex = -1
+		for i in range(len(curFPathData.vFPPassPntData)):
+			if curFPathData.vFPPassPntData[i].iFixID == iConFixID:
+				iFirstStartIndex = i
+
+		for i in range(len(curFPathData.vFPPassPntData)):
+			if conFPPathData.vFPPassPntData[i].iFixID == iConFixID:
+				iSecondStartFixIDIndex = i
+
+		##查找到最开始的公共冲突点
+		j=1
+		iFirstCommonStartIndex = -1
+		iSecCommonStartIndex = -1
+		for i in range(iFirstStartIndex+1, len(curFPathData.vFPPassPntData)):
+			if iSecondStartFixIDIndex - j <= 0:
+				break
+
+			if curFPathData.vFPPassPntData[i].iFixID == conFPPathData.vFPPassPntData[iSecondStartFixIDIndex-j].iFixID:
+				j+=1
+				iFirstCommonStartIndex = i
+				iSecCommonStartIndex = iSecondStartFixIDIndex-j
+			else:
+				break
+
+		##获得公共节点的过点时间
+		iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
+		iDiffTime = -1
+		for i in range(len(conFPPathData.vFPPassPntData)):
+			if i < iSecCommonStartIndex:
+				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+			elif i == iSecCommonStartIndex:
+				stFPPassPntData = conFPPathData.vFPPassPntData[i]
+				iOrgTime = conFPPathData.vFPPassPntData[i].iRealPassTime
+				iNewTime = iCommonConPassPntTime + 20
+				iDiffTime = iNewTime - iOrgTime
+				stFPPassPntData.iRealPassTime = iNewTime ##默认添加20s
+				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+			else:
+				stFPPassPntData = conFPPathData.vFPPassPntData[i]
+				stFPPassPntData.iRealPassTime += iDiffTime
+				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+		return newPath
 	# brief:解决冲突并返回冲突后的路径滑行时间
 	# iStartTime:[in] 当前开始滑行时间
 	# FPPathData:[in] 冲突滑行路线
