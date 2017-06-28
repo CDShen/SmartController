@@ -96,8 +96,8 @@ class UtilityTool(object):
 		return newPath
 
 	@classmethod
-	def resolveConflictByAction(cls, curFPathData, conFPPathData ,ConflictData):
-		newPath = copy.deepcopy(conFPPathData)
+	def resolveConflictByAction(cls, curFPathData, conFPPathData ,ConflictData, eActionType):
+		newPath = copy.deepcopy(curFPathData)
 		##清空lst
 		newPath.vFPPassPntData = []
 		iConFixID = ConflictData.iConflictFixID
