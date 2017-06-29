@@ -10,6 +10,7 @@ from math import *
 from ..public.dataObj import *
 from ..public.scenarioDataObj import *
 from ..public.dataManage import DataManager
+from ..public.config import ConfigReader
 import copy
 
 
@@ -53,6 +54,7 @@ class UtilityTool(object):
 		iConFixID = ConflictData.iConflictFixID
 		iFirstStartIndex = -1
 		iSecondStartFixIDIndex = -1
+
 		for i in range(len(curFPathData.vFPPassPntData)):
 			if curFPathData.vFPPassPntData[i].iFixID == iConFixID:
 				iFirstStartIndex = i
@@ -63,8 +65,8 @@ class UtilityTool(object):
 
 		##查找到最开始的公共冲突点
 		j=1
-		iFirstCommonStartIndex = -1
-		iSecCommonStartIndex = -1
+		iFirstCommonStartIndex = iFirstStartIndex
+		iSecCommonStartIndex = iSecondStartFixIDIndex
 		for i in range(iFirstStartIndex+1, len(curFPathData.vFPPassPntData)):
 			if iSecondStartFixIDIndex - j <= 0:
 				break
@@ -81,18 +83,18 @@ class UtilityTool(object):
 		iDiffTime = -1
 		for i in range(len(conFPPathData.vFPPassPntData)):
 			if i < iSecCommonStartIndex:
-				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+				newPath.vFPPassPntData.append(copy.deepcopy(conFPPathData.vFPPassPntData[i]))
 			elif i == iSecCommonStartIndex:
-				stFPPassPntData = conFPPathData.vFPPassPntData[i]
+				stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
 				iOrgTime = conFPPathData.vFPPassPntData[i].iRealPassTime
 				iNewTime = iCommonConPassPntTime + 20
 				iDiffTime = iNewTime - iOrgTime
 				stFPPassPntData.iRealPassTime = iNewTime ##默认添加20s
-				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+				newPath.vFPPassPntData.append(stFPPassPntData)
 			else:
-				stFPPassPntData = conFPPathData.vFPPassPntData[i]
+				stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
 				stFPPassPntData.iRealPassTime += iDiffTime
-				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+				newPath.vFPPassPntData.append(stFPPassPntData)
 		return newPath
 
 	@classmethod
@@ -113,36 +115,64 @@ class UtilityTool(object):
 
 		##查找到最开始的公共冲突点
 		j=1
-		iFirstCommonStartIndex = -1
-		iSecCommonStartIndex = -1
-		for i in range(iFirstStartIndex+1, len(curFPathData.vFPPassPntData)):
-			if iSecondStartFixIDIndex - j <= 0:
+		iFirstCommonStartIndex = iFirstStartIndex
+		iSecCommonStartIndex = iSecondStartFixIDIndex
+		for i in range(iSecondStartFixIDIndex+1, len(conFPPathData.vFPPassPntData)):
+			if iFirstCommonStartIndex - j <= 0:
 				break
 
-			if curFPathData.vFPPassPntData[i].iFixID == conFPPathData.vFPPassPntData[iSecondStartFixIDIndex-j].iFixID:
+			if curFPathData.vFPPassPntData[iFirstStartIndex-j].iFixID == conFPPathData.vFPPassPntData[i].iFixID:
 				j+=1
-				iFirstCommonStartIndex = i
-				iSecCommonStartIndex = iSecondStartFixIDIndex-j
+				iFirstCommonStartIndex = iFirstStartIndex-j
+				iSecCommonStartIndex = i
 			else:
 				break
 
 		##获得公共节点的过点时间
+		dTotalDis = 0.0
 		iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
 		iDiffTime = -1
-		for i in range(len(conFPPathData.vFPPassPntData)):
-			if i < iSecCommonStartIndex:
-				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
-			elif i == iSecCommonStartIndex:
-				stFPPassPntData = conFPPathData.vFPPassPntData[i]
-				iOrgTime = conFPPathData.vFPPassPntData[i].iRealPassTime
-				iNewTime = iCommonConPassPntTime + 20
-				iDiffTime = iNewTime - iOrgTime
-				stFPPassPntData.iRealPassTime = iNewTime ##默认添加20s
-				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+		for i in range(len(curFPathData.vFPPassPntData)):
+			if i < iFirstCommonStartIndex:
+				cguPos1 = CguPos(curFPathData.vFPPassPntData[i].x, curFPathData.vFPPassPntData[i].y)
+				cguPos2 = CguPos(curFPathData.vFPPassPntData[i+1].x, curFPathData.vFPPassPntData[i+1].y)
+				dTotalDis += MathUtilityTool.Distance(cguPos1, cguPos2)
+
+		if eActionType.value == ENUM_QACTION_TYPE.E_ACTION_SLOWDOWN.value:
+			dDis = (dTotalDis-ConfigReader.dSafeDis)
+			iTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime - \
+				    curFPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
+			dSpd = dDis/iTime
+			##减速每段增加时间
+			iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
+			if dSpd < ConfigReader.dSlowMinSpd:
+				return None
 			else:
-				stFPPassPntData = conFPPathData.vFPPassPntData[i]
-				stFPPassPntData.iRealPassTime += iDiffTime
-				newPath.vFPPassPntData.append(conFPPathData.vFPPassPntData[i])
+				for i in range(len(curFPathData.vFPPassPntData)):
+					if i == 0:
+						newPath.vFPPassPntData.append(copy.deepcopy(curFPathData.vFPPassPntData[i]))
+					if i <= iFirstCommonStartIndex and i>0:
+						stFPPassPntData = copy.deepcopy(curFPathData.vFPPassPntData[i])
+						stFPPassPntData.iRealPassTime = stFPPassPntData.iRealPassTime + iSlowTime
+						stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN
+						newPath.vFPPassPntData.append(stFPPassPntData)
+					else:
+						stFPPassPntData = copy.deepcopy(curFPathData.vFPPassPntData[i])
+						stFPPassPntData.iRealPassTime = curFPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime
+						newPath.vFPPassPntData.append(stFPPassPntData)
+
+
+		elif eActionType.value == ENUM_QACTION_TYPE.E_ACTION_STOP.value:
+			for i in range(len(curFPathData.vFPPassPntData)):
+				if i < iFirstCommonStartIndex:
+					newPath.vFPPassPntData.append(copy.deepcopy(curFPathData.vFPPassPntData[i]))
+				else:
+					stFPPassPntData = copy.deepcopy(curFPathData.vFPPassPntData[i])
+					stFPPassPntData.iRealPassTime = curFPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime
+					if i == iFirstCommonStartIndex:
+						stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_STOP
+					newPath.vFPPassPntData.append(stFPPassPntData)
+
 		return newPath
 	# brief:解决冲突并返回冲突后的路径滑行时间
 	# iStartTime:[in] 当前开始滑行时间

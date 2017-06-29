@@ -42,23 +42,39 @@ class QLearnFunction(LearnFunction):
 		pass
 	##breif:Q学习回报函数
 	##remark:目前Q只是回报只处理当前飞机的滑行路线
-	def _reward(self, QStateData, eActionType, PathData, ConflictData):
+	def _reward(self, QStateData, eActionType, PathData, pConFlightPlan, ConflictData):
 		FPPath = None
 		dReward = 0.0
+		iOrgTotalTime = UtilityTool.getTotalPathTaxiTime(PathData)
+		curFPathData = self.pFlightPlan.getFlightPlanPath()
+		iStartTime = self.pFlightPlan.getFlightPlanStartTime()
+		conFPPathData = pConFlightPlan.getFlightPlanPath()
+		dTheta = ConfigReader.dTheta
+
+		FPPath = UtilityTool.resolveConflictByAction(curFPathData, conFPPathData, ConflictData, eActionType)
+
+
+		if FPPath == None:
+			dReward = ConfigReader.dNonePathFine
+		else:
+			iConflictTime = UtilityTool.getTotalFPTaxiTime(iStartTime,FPPath)
+			dRatio = dTheta*(iConflictTime/iOrgTotalTime) + (1-dTheta)*self.pDataManager.getPathAverageRatio(PathData.iPathID)
+			dReward = 1/dRatio
+
 
 
 
 		return  dReward, FPPath
 	##brief 更新Q值并返回分数和路线
 	##warn:注意是否能通过引用方式更新值
-	def _updateQValue(self, QStateActionScoreData, PathData, ConflictData):
+	def _updateQValue(self, QStateActionScoreData, PathData,pConFlightPlan, ConflictData):
 		ScorePathDic = {'score': None, 'orgPath': None, 'FPPath':None}
 		score = 0.0
 		orgPath = PathData
 		FPPath = None
 		QStateData = QStateActionScoreData.QStateData
 		eActionType = QStateActionScoreData.QActionData
-		dReward ,FPPath = self._reward(QStateData, eActionType, PathData, ConflictData)
+		dReward ,FPPath = self._reward(QStateData, eActionType, PathData, pConFlightPlan ,ConflictData)
 
 		QStateActionScoreData.dScore = QStateActionScoreData.dScore *(1.0-self.beta) + self.beta*dReward
 		ScorePathDic['score'] = QStateActionScoreData.dScore
@@ -128,7 +144,7 @@ class QLearnFunction(LearnFunction):
 		QStateActionScoreDataLst = self._findQState(QStateData)
 		ScorePathDicLst = []
 		for i in range(len(QStateActionScoreDataLst)):
-			ScorePathDic = self._updateQValue(self, QStateActionScoreDataLst[i], PathData, ConflictData)
+			ScorePathDic = self._updateQValue(self, QStateActionScoreDataLst[i], PathData,pConFlightPlan, ConflictData)
 			ScorePathDicLst.append(ScorePathDic)
 
 
