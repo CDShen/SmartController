@@ -1,4 +1,6 @@
 from .baseDataDef import BaseData
+from configparser import ConfigParser
+
 
 
 ##brief 配置文件
@@ -13,7 +15,7 @@ from .baseDataDef import BaseData
 ##dTheta->Q学习冲突时间和历史时间的权重
 ##dSlowMinSpd->减速动作时候的最小速度
 ##dSafeDis->减速运动和停止时候的最小安全距离
-##iResolveConfilictTime->过点多少时间后才仍为解决冲突
+##iResolveConfilictTime->过点多少时间后才认为解决冲突
 ##dNonePathFine->没有解决冲突时候的惩罚值
 ##remark
 
@@ -24,5 +26,24 @@ class ConfigReader(BaseData):
 
 	@classmethod
 	def loadConfig(cls):
-		bSucess = False
-		return bSucess
+		cfg = ConfigParser()
+		sectionHeaderLst = cfg.read('..\config.ini')
+		if len(sectionHeaderLst) == 0:
+			return False
+
+		ConfigReader.iFlightPlanNum = cfg.getint('Para', 'iFlightPlanNum')
+		ConfigReader.iWorkState = cfg.getint('Para', 'iWorkState')
+		ConfigReader.bNeedShow = cfg.getboolean('Para', 'bNeedShow')
+		ConfigReader.iStepCount = cfg.getint('Para', 'iStepCount')
+		ConfigReader.dThresholdScore = cfg.getfloat('Para', 'dThresholdScore')
+		ConfigReader.iFutureTimeMin = cfg.getint('Para', 'iFutureTimeMin')
+		ConfigReader.iConflictTimeThread = cfg.getint('Para', 'iConflictTimeThread')
+		ConfigReader.dBeta = cfg.getfloat('Para', 'dBeta')
+		ConfigReader.dTheta = cfg.getfloat('Para', 'dTheta')
+		ConfigReader.dSlowMinSpd = cfg.getint('Para', 'dSlowMinSpd')
+		ConfigReader.dSafeDis = cfg.getint('Para', 'dSafeDis')
+		ConfigReader.iResolveConfilictTime = cfg.getint('Para', 'iResolveConfilictTime')
+		ConfigReader.dNonePathFine = cfg.getfloat('Para', 'dNonePathFine')
+
+
+		return True

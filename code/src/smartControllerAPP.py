@@ -9,7 +9,6 @@ class SmartControllerAPP(object):
         self.pDataManager = None
         self.pWorkState = None
     def init(self):
-        bSucess = True
         ##读取配置文件
         if ConfigReader.loadConfig() == False:
             print ('读取配置文件失败')
@@ -36,7 +35,7 @@ class SmartControllerAPP(object):
         ##公共转换中需要DataManager获取某些数据
         UtilityTool.pDataManager = self.pDataManager
 
-        return bSucess
+        return True
 
     def run(self):
         ##开始工作

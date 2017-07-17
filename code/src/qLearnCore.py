@@ -45,6 +45,7 @@ class QLearnFunction(LearnFunction):
 	def _reward(self, QStateData, eActionType, PathData, pConFlightPlan, ConflictData):
 		FPPath = None
 		dReward = 0.0
+		dScore = 0.0 ##分数等于计划路线乘以系数
 		iOrgTotalTime = UtilityTool.getTotalPathTaxiTime(PathData)
 		curFPathData = self.pFlightPlan.getFlightPlanPath()
 		iStartTime = self.pFlightPlan.getFlightPlanStartTime()
@@ -60,26 +61,30 @@ class QLearnFunction(LearnFunction):
 			iConflictTime = UtilityTool.getTotalFPTaxiTime(iStartTime,FPPath)
 			dRatio = dTheta*(iConflictTime/iOrgTotalTime) + (1-dTheta)*self.pDataManager.getPathAverageRatio(PathData.iPathID)
 			dReward = 1/dRatio
+			dScore  = iOrgTotalTime * dReward
 
 
 
 
-		return  dReward, FPPath
+		return  dReward, FPPath, dScore
 	##brief 更新Q值并返回分数和路线
 	##warn:注意是否能通过引用方式更新值
 	def _updateQValue(self, QStateActionScoreData, PathData,pConFlightPlan, ConflictData):
-		ScorePathDic = {'score': None, 'orgPath': None, 'FPPath':None}
+		ScorePathDic = {'score': None, 'orgPath': None, 'FPPath':None, 'qscore':None}
 		score = 0.0
 		orgPath = PathData
 		FPPath = None
 		QStateData = QStateActionScoreData.QStateData
 		eActionType = QStateActionScoreData.QActionData
-		dReward ,FPPath = self._reward(QStateData, eActionType, PathData, pConFlightPlan ,ConflictData)
+		dReward ,FPPath, score = self._reward(QStateData, eActionType, PathData, pConFlightPlan ,ConflictData)
 
 		QStateActionScoreData.dScore = QStateActionScoreData.dScore *(1.0-self.beta) + self.beta*dReward
-		ScorePathDic['score'] = QStateActionScoreData.dScore
+		ScorePathDic['score'] = score
 		ScorePathDic['path'] = orgPath
 		ScorePathDic['FPPath'] = FPPath
+		ScorePathDic['qscore'] = QStateActionScoreData.dScore
+
+
 		return ScorePathDic
 
 	def _getQValue(self, state, action):
@@ -106,7 +111,7 @@ class QLearnFunction(LearnFunction):
 		return bFind, QStateActionScoreDataLst
 
 	def _findQState(self, QStateData):
-		bFind, QStateActionScoreDataLst = self._findQState(QStateData)
+		bFind, QStateActionScoreDataLst = self._findQStateLocal(QStateData)
 		if bFind == False:
 			bFind, QStateActionScoreDataLst = self.pDataManager.findQState(QStateData)
 			if bFind == True:
@@ -154,7 +159,7 @@ class QLearnFunction(LearnFunction):
 			for j in range(0, len(ScorePathDicLst) - 1 - i):
 				item = ScorePathDicLst[j]
 				itemNext = ScorePathDicLst[j + 1]
-				if item.get('score') < itemNext.get('score'):
+				if item.get('qscore') < itemNext.get('qscore'):
 					itemTmp = itemNext
 					ScorePathDicLst[j + 1] = item
 					ScorePathDicLst[j] = itemTmp
