@@ -3,6 +3,7 @@ brief 方法包括数据库数据的初始化、获取结构方法
 """
 from .dataObj import *
 from ..src.utility import *
+from .dataService import DataService
 
 ##brief 数据管理类
 class DataManager(object):
@@ -11,6 +12,15 @@ class DataManager(object):
     PathDataDic = {}
     def init(self):
         bInit = True
+        self.pDataService = DataService()
+        if self.pDataService.isConnectDB() == False:
+            return False
+
+        QStateActionScoreDataLst = self.pDataService.loadQStateActionScoreDataLst()
+        FixPointDataDic = self.pDataService.loadFixPntData()
+        PathDataDic = self.pDataService.loadPathData()
+
+
         return  bInit
     def getFlightPlanAllPath(self, iStartID, iEndID):
         vPathData = []
@@ -43,18 +53,19 @@ class DataManager(object):
 
     def findQState(self, QStateData):
         bFind = False
-        QStateActionScoreDataLst = []
+        QCurStateActionScoreDataLst = []
         iCount = 0
         for i in range(len(self.QStateActionScoreDataLst)):
-            stQStateData = self.QStateActionScoreDataLst[i].QStateActionScoreData.QStateData
+            stQStateData = self.QStateActionScoreDataLst[i].QStateData
             if stQStateData == QStateData:
-                QStateActionScoreDataLst.append(QStateActionScoreDataLst[i])
+                QCurStateActionScoreDataLst.append(QStateActionScoreDataLst[i])
                 iCount += 1
+                ##因为只有减速和等待两种方式
                 if iCount == 2:
                     bFind = True
-                    return bFind, QStateActionScoreDataLst
+                    return bFind, QCurStateActionScoreDataLst
 
-        return bFind, QStateActionScoreDataLst
+        return bFind, QCurStateActionScoreDataLst
 
     def getPathAverageRatio(self, iPathID):
         vPathData = []

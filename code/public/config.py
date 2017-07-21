@@ -4,6 +4,11 @@ from configparser import ConfigParser
 
 
 ##brief 配置文件
+
+##strIP->数据库IP
+##strUser->用户名
+##strPwd->密码
+##strDbName->数据库名称
 ##iFlightPlanNum->飞行计划数量
 ##iWorkState->1:学习模式 2：验证模式
 ##bNeedShow->是否需要演示
@@ -19,8 +24,9 @@ from configparser import ConfigParser
 ##dNonePathFine->没有解决冲突时候的惩罚值
 ##remark
 
+
 class ConfigReader(BaseData):
-	_fields = ['iFlightPlanNum','iWorkState','bNeedShow', 'iStepCount',\
+	_fields = ['strIP', 'strUser','strPwd','strDbName','iFlightPlanNum','iWorkState','bNeedShow', 'iStepCount',\
 	           'dThresholdScore', 'iFutureTimeMin', 'iConflictTimeThread','dBeta','dTheta'\
 	           'dSlowMinSpd', 'dSafeDis', 'iResolveConfilictTime', 'dNonePathFine']
 
@@ -30,6 +36,12 @@ class ConfigReader(BaseData):
 		sectionHeaderLst = cfg.read('..\config.ini')
 		if len(sectionHeaderLst) == 0:
 			return False
+
+		ConfigReader.strIP = cfg.get('DataBase', 'IP')
+		ConfigReader.strUser = cfg.get('DataBase', 'Usere')
+		ConfigReader.strPwd = cfg.get('DataBase', 'Password')
+		ConfigReader.DBName = cfg.get('DataBase', 'ATCSIM_VIRTUAL')
+
 
 		ConfigReader.iFlightPlanNum = cfg.getint('Para', 'iFlightPlanNum')
 		ConfigReader.iWorkState = cfg.getint('Para', 'iWorkState')
