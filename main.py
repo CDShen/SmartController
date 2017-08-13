@@ -1,4 +1,4 @@
-from code.src.smartControllerAPP import SmartControllerAPP
+from project.src.smartControllerAPP import SmartControllerAPP
 
 
 def mainApp():
@@ -6,7 +6,7 @@ def mainApp():
 	if theApp.init() == False:
 		print ('程序初始化错误')
 
-	theApp.run()
+	#theApp.run()
 
 
 if __name__=='__main__':
