@@ -38,8 +38,8 @@ class DataService(object):
 		pathDataDic = {}
 		sql = 'select * from path'
 		resultList = self.pMsSql.execQuery(sql)
-		for path_id, start_fix_id, end_fix_id, ues_num in resultList:
-			stPathData = PathData(path_id, start_fix_id, end_fix_id, ues_num, [])
+		for path_id, path_name, start_fix_id, end_fix_id, ues_num in resultList:
+			stPathData = PathData(path_id, path_name, start_fix_id, end_fix_id, ues_num,[])
 			sqlSub = 'select * from path_pass_info where path_id = {0} order by path_id, sequence'.format(path_id)
 			resultSubList = self.pMsSql.execQuery(sqlSub)
 			vPassPntData = []

@@ -55,12 +55,13 @@ class PassPntData(BaseData):
 
 #####滑行路径
 ##iPathID->滑行路径ID  唯一
+##strPathName->滑行道路名称
 ##iUseNum->使用次数
 ##iStartFixID->开始固定点ID
 ##iEndFixID->结束固定点ID
 ##vPassPntData->过点时间list, list顺序即滑行序号
 class PathData(BaseData):
-	_fields = ['iPathID', 'iStartFixID','iEndFixID','iUseNum', 'vPassPntData']
+	_fields = ['iPathID','strPathName', 'iStartFixID','iEndFixID','iUseNum', 'vPassPntData']
 
 #####起始/终点滑行路径集合
 ##iStartID->起始固定点ID
