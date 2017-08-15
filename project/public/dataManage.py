@@ -34,8 +34,9 @@ class DataManager(object):
         return self.PathDataDic.get(iPathID)
 
     def getFixPntConType(self, iFixPntID):
-        eFixPntType =  E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_ARR
-        return eFixPntType
+        eConflictType = self.FixPointDataDic.get(iFixPntID).eConflictType
+        return eConflictType
+
     def getMaxUseValPath(self, iStartID, iEndID):
         vPathData = self.getFlightPlanAllPath(iStartID, iEndID)
         iUseMaxNum = -1
@@ -49,7 +50,8 @@ class DataManager(object):
     def getFixPointByID(self, iFixPntID):
         return  self.FixPointDataDic.get(iFixPntID)
 
-    def saveData(self):
+    ##brief:存储更新训练数据，1、Q函数 2、历史滑行路径选择
+    def saveData(self, QStateActionScoreDataLst, PathIDLst):
         bSucess = True
         return  bSucess
 

@@ -7,5 +7,5 @@ class Animal(Enum):
 c = Animal(2)
 print (c)
 
-for i in Animal:
-	print (i)
+# for i in Animal:
+# 	print (i)

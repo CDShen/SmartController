@@ -63,9 +63,6 @@ class QLearnFunction(LearnFunction):
 			dReward = 1/dRatio
 			dScore  = iOrgTotalTime * dReward
 
-
-
-
 		return  dReward, FPPath, dScore
 	##brief 更新Q值并返回分数和路线
 	##warn:注意是否能通过引用方式更新值
@@ -123,10 +120,12 @@ class QLearnFunction(LearnFunction):
 					eActionType = eAction
 					dScore = 1.0
 					QStateActionScoreData = QStateActionScoreData(stQStateData,eActionType,dScore)
+					##添加到本地数据中
 					self.QStateActionScoreDataLst.append(QStateActionScoreData)
 					QStateActionScoreDataLst.append(QStateActionScoreData)
-
-		return 	QStateActionScoreDataLst
+				return QStateActionScoreDataLst
+		else:
+			return 	QStateActionScoreDataLst
 
 	@classmethod
 	def __transData2QState(cls,pFlightPlan, PathData, pConFlightPlan, ConflictData):
@@ -172,9 +171,8 @@ class QLearnFunction(LearnFunction):
 		dFPPath = None
 		return dMaxScore,bestPath,dFPPath
 
-
-
-
+	def getQStateActionData(self):
+		return self.QStateActionScoreDataLst
 
 
 

@@ -51,8 +51,13 @@ class SmartControllerAPP(object):
     def run(self):
         ##开始工作
         self.pWorkState.doWork()
+        ##获取需要保存的数据1、QState状态 2、滑行路线
+        QStateActionScoreDataLst = self.pWorkState.getQStateActionData()
+        PathIDLst = self.pWorkState.getAllFlightPlanBestPath()
         ##保存数据
-        if self.pDataManager.saveData():
+
+
+        if self.pDataManager.saveData(QStateActionScoreDataLst,PathIDLst):
             print('保存数据库成功')
         else:
             print('保存数据库失败')

@@ -16,7 +16,8 @@ class DataService(object):
 		FixPointDataDic = {}
 		resultList = self.pMsSql.execQuery(sql)
 		for fixpoint_id,icon_id,fixpoint_name,airport_id,type,x,y,z,is_waiting_point,fix_conflict_type in resultList:
-			stFixPntData = FixPointData(fixpoint_id, fixpoint_name,x,y,fix_conflict_type )
+			eConflictType = E_FIXPOINT_CONF_TYPE(fix_conflict_type)
+			stFixPntData = FixPointData(fixpoint_id, fixpoint_name,x,y,eConflictType)
 			FixPointDataDic.setdefault(fixpoint_id, stFixPntData)
 		return FixPointDataDic
 

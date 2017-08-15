@@ -94,7 +94,8 @@ class PathSelect(object):
         ScorePathDic['FPPath'] = FPPath
         return  ScorePathDic
 
-
+    def getQStateActionData(self):
+        return self.pQLearnFunction.getQStateActionData()
 
 
 

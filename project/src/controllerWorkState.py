@@ -49,6 +49,11 @@ class LearnWorkState(ControllerWorkState):
 				##对合法路径进行打分、更新Q值后加入集合
 				self.pPathSelect.setCurFlightPlan(pNextFlightPlan)
 				self._pathSelect()
+	def getQStateActionData(self):
+		self.pPathSelect.getQStateActionData()
+
+	def getAllFlightPlanBestPath(self):
+		self.pFlightMgr.getAllFlightPlanBestPath()
 	def _getNextFlightPlan(self):
 		return self.pFlightMgr.getNextFlightPlan()
 	def _addFutureFlightPlan(self, iTime):
