@@ -43,7 +43,7 @@ class DataService(object):
 			sqlSub = 'select * from path_pass_info where path_id = {0} order by path_id, sequence'.format(path_id)
 			resultSubList = self.pMsSql.execQuery(sqlSub)
 			vPassPntData = []
-			for path_id, sequence, fix_id, rela_pass_time in resultSubList:
+			for path_id, sequence, fix_id, fix_name,rela_pass_time in resultSubList:
 				stPassPntData = PassPntData(fix_id, rela_pass_time)
 				vPassPntData.append(stPassPntData)
 

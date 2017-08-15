@@ -1,8 +1,5 @@
 import  random
+from math import *
 
-a= []
-for i in range(1000):
-    print (random.randint(0,1000))
 
-# print (2%2,5%2)
-# print (random.sample(a,100))
+print (pow(4,0.5))
