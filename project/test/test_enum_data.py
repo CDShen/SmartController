@@ -5,7 +5,7 @@ class Animal(Enum):
 	dog = 2
 
 c = Animal(2)
-print (c)
+print (c.value)
 
 # for i in Animal:
 # 	print (i)

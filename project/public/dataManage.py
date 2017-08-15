@@ -52,6 +52,8 @@ class DataManager(object):
 
     ##brief:存储更新训练数据，1、Q函数 2、历史滑行路径选择
     def saveData(self, QStateActionScoreDataLst, PathIDLst):
+        self.pDataService.saveQStateData(QStateActionScoreDataLst)
+        self.pDataService.savePathData(PathIDLst)
         bSucess = True
         return  bSucess
 

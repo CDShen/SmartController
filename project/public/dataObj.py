@@ -26,6 +26,11 @@ class E_CONFLICT_TYPE(Enum):
 	E_CONFLICT_CROSS = 1  ##交叉冲突30-150°
 	E_CONFLICT_OPP = 2  ##对头冲突150-180°
 
+#####飞行计划类型
+class ENUM_FP_TYPE(Enum):
+	E_FP_TYPE_NONE = 0  ##未知
+	E_FP_TYPE_ARR = 1  ##进港计划
+	E_FP_TYPE_DEP = 2 ##离港计划
 
 class FixPointData(BaseData):
 	_fields = ['iID', 'strName', 'dX', 'dY','eConflictType']
