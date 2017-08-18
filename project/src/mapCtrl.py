@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 class MapCtrl(object):
 	def __init__(self):
 		self.RoadDataDic = {}
-
+		self.plt = plt
 	class FixPointData(BaseData):
 		_fields = ['iID', 'strName', 'dX', 'dY', 'eConflictType']
 
@@ -43,6 +43,20 @@ class MapCtrl(object):
 		self.showRoadData()
 
 	def showRoadData(self):
+		xLst = []
+		yLst = []
+		for i in self.RoadDataDic:
+			vFixPntData = self.RoadDataDic.get(i).vFixPnt
+			strRoadName = self.RoadDataDic.get(i).strName
+			for j in range(len(vFixPntData)):
+				stFixData = vFixPntData[j]
+				xLst.append(stFixData.dX)
+				yLst.append(stFixData.dY)
+
+		fig = self.plt.figure()
+		ax1 = fig.add_subplot(1, 1, 1, xlim=(min(xLst) - 100, max(xLst) + 100), ylim=(min(yLst) - 100, max(yLst) + 100))
+		ax1.set_title('Airport')
+		# line, = ax1.plot([], [], '-', label='TaxiLine', lw=1)
 
 		for i in self.RoadDataDic:
 			vFixPntData = self.RoadDataDic.get(i).vFixPnt
@@ -62,7 +76,8 @@ class MapCtrl(object):
 			# plt.plot(xLst, yLst, label = strRoadName, color=' black ', linestyle='-')  # 默认
 			avgX = sumX / len(vFixPntData)
 			avgY = sumY / len(vFixPntData)
-			plt.plot(xLst, yLst, color = 'black', linestyle= '-')
-			plt.text(avgX, avgY,strRoadName)
+
+			ax1.plot(xLst, yLst, 'k-', label='TaxiLine', lw=1)
+			ax1.text(avgX, avgY, strRoadName, family='serif', style='italic', ha='right', wrap=True)
 		plt.show()
 

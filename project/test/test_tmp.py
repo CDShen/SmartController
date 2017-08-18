@@ -1,5 +1,3 @@
-import  random
-from math import *
-
-
-print (pow(4,0.5))
+import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib import animation

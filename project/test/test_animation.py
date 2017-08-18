@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
-# first set up the figure, the axis, and the plot element we want to animate
+#first set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
 ax1 = fig.add_subplot(1, 1 ,1 ,xlim=(0, 200), ylim=(0, 200))
 line,  = ax1.plot([], [], 'o',label = 'good',lw=1)
