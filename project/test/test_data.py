@@ -31,7 +31,11 @@ stRoadData.vFixpnt.append(FixPnt(4,1))
 #for j in len(stRoadData.vFixpnt):
 #	print (stRoadData.vFixpnt[j].x)
 
+def fun(iData=1,  **kwargs):
+	print (iData+1)
+	# for k in range(len(args)):
+	# 	print (args[k])
+	for i in kwargs:
+		print (kwargs.get(i))
 
-a = [1,2,3,4]
-for i in range(len(a)):
-	print (a[i])
+fun(a=1)
