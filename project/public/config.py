@@ -9,6 +9,7 @@ from configparser import ConfigParser
 ##strUser->用户名
 ##strPwd->密码
 ##strDbName->数据库名称
+##strTrainDataPath->训练计划数据位置
 ##dCenterLon->中心经度
 ##dCenterLat->中心纬度
 ##iFlightPlanNum->飞行计划数量
@@ -28,7 +29,7 @@ from configparser import ConfigParser
 
 
 class ConfigReader(BaseData):
-	_fields = ['strIP', 'strUser','strPwd','strDbName','dCenterLon','dCenterLat','iFlightPlanNum','iWorkState','bNeedShow', 'iStepCount',\
+	_fields = ['strIP', 'strUser','strPwd','strDbName','strTrainDataPath','dCenterLon','dCenterLat','iFlightPlanNum','iWorkState','bNeedShow', 'iStepCount',\
 	           'dThresholdScore', 'iFutureTimeMin', 'iConflictTimeThread','dBeta','dTheta'\
 	           'dSlowMinSpd', 'dSafeDis', 'iResolveConfilictTime', 'dNonePathFine']
 
@@ -45,6 +46,7 @@ class ConfigReader(BaseData):
 		ConfigReader.strUser = cfg.get('DataBase', 'User')
 		ConfigReader.strPwd = cfg.get('DataBase', 'Password')
 		ConfigReader.DBName = cfg.get('DataBase', 'DBName')
+		ConfigReader.strTrainDataPath = cfg.get('DataBase', 'TrainDataPath')
 		##读取系统参数
 		ConfigReader.dCenterLon = cfg.getfloat('Para', 'dCenterLon')
 		ConfigReader.dCenterLat = cfg.getfloat('Para', 'dCenterLat')

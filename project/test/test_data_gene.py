@@ -1,6 +1,34 @@
 import csv
 from configparser import ConfigParser
 import random
+import copy
+
+import os
+
+
+def delete_file_folder(src):
+    '''delete files and folders'''
+
+    if os.path.isfile(src):
+        try:
+            os.remove(src)
+        except:
+            pass
+
+            # www.iplaypy.com
+
+    elif os.path.isdir(src):
+        for item in os.listdir(src):
+            itemsrc = os.path.join(src, item)
+            delete_file_folder(itemsrc)
+        # try:
+        #     os.rmdir(src)
+        # except:
+        #     pass
+
+
+
+
 
 class FlyPlanGen(object):
     GroupFlyPlanDataLst = []
@@ -8,6 +36,7 @@ class FlyPlanGen(object):
     ArrEndFixLst = []
     DepStartFixLst = []
     DepEndFixLst = []
+    CallSignLst = []
     iInterval = 0
     iTotalNum = 50
     iGroupNum = 1
@@ -44,6 +73,13 @@ class FlyPlanGen(object):
         for i in tmpLst:
             self.DepEndFixLst.append(int(i))
 
+
+        ##获取可用呼号
+        strParaLst = cfg.get('DataBase','CallsignSet')
+        tmpLst = strParaLst.split(' ')
+        for i in tmpLst:
+            self.CallSignLst.append(str(i))
+
         self.strSavePath = cfg.get('DataBase', 'Path')
         self.iInterval = cfg.getint('DataBase', 'Interval')
         self.iTotalNum = cfg.getint('DataBase', 'TotalNum')
@@ -52,20 +88,29 @@ class FlyPlanGen(object):
     def geneFlyPlanData(self):
         for i in range(self.iGroupNum):
             FlyPlanDataLst = []
+            ##已经使用的呼号下标
+            usedCallsignSeqDic = {}
             for j in range(self.iTotalNum):
                 oneFlyPlanData = []
                 ##产生随机数，如果偶数为进港，基数是离港  1进港 2离港
                 k = random.randint(0,1000) % 2
+                ##首先取出呼号
+                iRanCallsignSeq = random.randint(0,len(self.CallSignLst)-1)
+                while usedCallsignSeqDic.get(iRanCallsignSeq) != None:
+                    iRanCallsignSeq = random.randint(0, len(self.CallSignLst) - 1)
+                usedCallsignSeqDic.setdefault(iRanCallsignSeq, iRanCallsignSeq)
+                strCallsign = self.CallSignLst[iRanCallsignSeq]
+
                 if k==0:
                     oneFlyPlanData.append(j+1)
-                    oneFlyPlanData.append('S{0}'.format(j+1))
+                    oneFlyPlanData.append(strCallsign)
                     oneFlyPlanData.append(1)
-                    oneFlyPlanData.append(self.iInterval*60*j)
+                    oneFlyPlanData.append(self.iInterval * 60 * j)
                     oneFlyPlanData.append(random.choice(self.ArrStartFixLst))
                     oneFlyPlanData.append(random.choice(self.ArrEndFixLst))
                 else:
                     oneFlyPlanData.append(j+1)
-                    oneFlyPlanData.append('S{0}'.format(j+1))
+                    oneFlyPlanData.append(strCallsign)
                     oneFlyPlanData.append(2)
                     oneFlyPlanData.append(self.iInterval * 60 * j)
                     oneFlyPlanData.append(random.choice(self.DepStartFixLst))
@@ -75,6 +120,7 @@ class FlyPlanGen(object):
 
             self.GroupFlyPlanDataLst.append(FlyPlanDataLst)
     def save(self):
+        delete_file_folder(self.strSavePath[:-1])
         headers = ['ID', 'Callsign', 'FlightType', 'StartTime', 'StartFixID', 'EndFixID']
         for i in range(len(self.GroupFlyPlanDataLst)):
             rows = self.GroupFlyPlanDataLst[i]

@@ -12,19 +12,20 @@ class FlightPlanMgr(object):
 		self.pTaxiMap = TaxiMap(self, pDataManager)
 		self.pDataManage = pDataManager
 	##brief 创建飞行计划
-	def createFlightPlan(self, n):
-		pFlightPlanLst = FlightPlanGen.geneFlightPlan(n)
+	def createFlightPlan(self, iSeq):
+		pFlightPlanLst = FlightPlanGen.geneFlightPlan(iSeq, self.pDataManage)
 		for i in range(len(pFlightPlanLst)):
-			self.FlightPlanDic.setdefault(pFlightPlanLst[i].getFlightPlanID, pFlightPlanLst[i])
+			self.FlightPlanDic.setdefault(pFlightPlanLst[i].getFlightPlanID(), pFlightPlanLst[i])
 
 	##1、获取下一个飞行计划，如果为空表示该episode结束，时间根据ID递增
 	##2、判断是否该飞行计划时候是否有飞行计划已经结束并置位
+	##3、如果开始为-1证明从头开始取
 	def getNextFlightPlan(self, iStartID = -1):
 		iNextPlanID = -1
 		if iStartID == -1:
-			iNextPlanID = self.iCurFlanID+1
+			iNextPlanID = 1
 		else:
-			iNextPlanID = 0
+			iNextPlanID = iStartID + 1
 		pFlightPlan = self.FlightPlanDic.get(iNextPlanID)
 		if pFlightPlan == None:
 			return  None
@@ -47,7 +48,7 @@ class FlightPlanMgr(object):
 
 	##brief 获取指定ID的飞行计划
 	def getFlightPlanByID(self, iFPlanID):
-		return self.FlightPlanPathDic.get(iFPlanID)
+		return self.FlightPlanDic.get(iFPlanID)
 
 	def getAllFlightPlanBestPath(self):
 		PathIDLst = []
@@ -59,30 +60,44 @@ class FlightPlanMgr(object):
 
 
 	def addFutureFlightPlan(self, iTime):
-		iFPlanID = self.iCurFlanID
-		pFlightPlan = self.getNextFlightPlan(iFPlanID)
+		##当前计划
+		pCurFlightPlan = self.getFlightPlanByID(self.iCurFlanID)
+		if self.curFlightPlanDic.get(self.iCurFlanID) == None:
+			self.curFlightPlanDic.setdefault(self.iCurFlanID, pCurFlightPlan)
+
+		##后续计划
+		pFlightPlan = self.getNextFlightPlan(self.iCurFlanID)
 		while pFlightPlan != None:
+			iFutureFlightPlanID = pFlightPlan.getFlightPlanID()
 			iStartTime = pFlightPlan.getFlightPlanStartTime()
+			##开始时间大于未来时间时候直接退出循环
 			if  iStartTime <= iTime:
-				if self.curFlightPlanDic.get(iFPlanID) == None:
-					pFlightPlan.updateFPStatus(ENUM_FP_STATUS.E_STATUS_FUTURE)
-					self.curFlightPlanDic.setdefault(iFPlanID, pFlightPlan)
+				if self.curFlightPlanDic.get(iFutureFlightPlanID) == None:
+					self.curFlightPlanDic.setdefault(iFutureFlightPlanID, pFlightPlan)
+					##添加当前从没加入到未来航班汇总的计划到滑行地图中
 					self.pTaxiMap.addFlightPlanPath(pFlightPlan)
 			else:
 				break
-			iFPlanID += 1
-			pFlightPlan = self.getNextFlightPlan(iFPlanID)
+			iFutureFlightPlanID += 1
+			pFlightPlan = self.getNextFlightPlan(iFutureFlightPlanID)
 
 	def refreshFlightPlan(self):
 		for k in self.curFlightPlanDic:
 			pFlightPlan = self.FlightPlanDic.get(k)
-			if pFlightPlan.isFlightPlanFin():
-				##删除taxiMap滑行路线
-				self.pTaxiMap.delFlightPlanPath(pFlightPlan.getFlightPlanID())
-				##删除飞行计划
-				del self.curFlightPlanDic[k]
-		##删除当前的滑行数据
-		self.pTaxiMap.delFlightPlanPath(self.iCurFlanID)
+			if k < self.iCurFlanID:
+				if pFlightPlan.isFlightPlanFin():
+					##删除taxiMap滑行路线
+					self.pTaxiMap.delFlightPlanPath(pFlightPlan.getFlightPlanID())
+					##删除飞行计划
+					del self.curFlightPlanDic[k]
+			elif k == self.iCurFlanID:
+				pFlightPlan.updateFPStatus(ENUM_FP_STATUS.E_STATUS_ACTIVE)
+				pFlightPlan.clearPath()
+				##删除当前的滑行数据
+				self.pTaxiMap.delFlightPlanPath(self.iCurFlanID)
+			else:
+				pFlightPlan.updateFPStatus(ENUM_FP_STATUS.E_STATUS_FUTURE)
+
 
 	def isFlightPlanStartByID(self, iFlightPlanID):
 		return  self.FlightPlanDic.get(iFlightPlanID).isFplightPlanStart()

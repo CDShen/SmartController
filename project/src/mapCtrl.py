@@ -24,15 +24,15 @@ class MapCtrl(object):
 
 	def setRoadData(self, stRoadData):
 		self.RoadDataDic = copy.deepcopy(stRoadData)
-		for i in self.RoadDataDic:
-			vFixPntData = self.RoadDataDic.get(i).vFixPnt
-			for j in range(len(vFixPntData)):
-				stFixData = vFixPntData[j]
-				cugPos = CguPos(stFixData.dX, stFixData.dY)
-				cguCenterPos = CguPos(ConfigReader.dCenterLon, ConfigReader.dCenterLat)
-				cguCovertPos = UtilityTool.covertLonLat2XY(cugPos, cguCenterPos)
-				stFixData.dX = cguCovertPos.x
-				stFixData.dY = cguCovertPos.y
+		# for i in self.RoadDataDic:
+		# 	vFixPntData = self.RoadDataDic.get(i).vFixPnt
+		# 	for j in range(len(vFixPntData)):
+		# 		stFixData = vFixPntData[j]
+		# 		cugPos = CguPos(stFixData.dX, stFixData.dY)
+		# 		cguCenterPos = CguPos(ConfigReader.dCenterLon, ConfigReader.dCenterLat)
+		# 		cguCovertPos = UtilityTool.covertLonLat2XY(cugPos, cguCenterPos)
+		# 		stFixData.dX = cguCovertPos.x
+		# 		stFixData.dY = cguCovertPos.y
 
 
 
@@ -76,7 +76,7 @@ class MapCtrl(object):
 			# plt.plot(xLst, yLst, label = strRoadName, color=' black ', linestyle='-')  # 默认
 			avgX = sumX / len(vFixPntData)
 			avgY = sumY / len(vFixPntData)
-
+			##'k-':黑色直线
 			ax1.plot(xLst, yLst, 'k-', label='TaxiLine', lw=1)
 			ax1.text(avgX, avgY, strRoadName, family='serif', style='italic', ha='right', wrap=True)
 		plt.show()

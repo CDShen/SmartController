@@ -2,7 +2,7 @@ from .dataServer import MSSQL
 from .scenarioDataObj import *
 from .dataObj import *
 from .config import ConfigReader
-
+from ..src.utility import UtilityTool
 
 class DataService(object):
     def __init__(self):
@@ -20,7 +20,12 @@ class DataService(object):
         resultList = self.pMsSql.execQuery(sql)
         for fixpoint_id, icon_id, fixpoint_name, airport_id, type, x, y, z, is_waiting_point, fix_conflict_type in resultList:
             eConflictType = E_FIXPOINT_CONF_TYPE(fix_conflict_type)
-            stFixPntData = FixPointData(fixpoint_id, fixpoint_name, x, y, eConflictType)
+
+            cugPos = CguPos(x, y)
+            cguCenterPos = CguPos(ConfigReader.dCenterLon, ConfigReader.dCenterLat)
+            cguCovertPos = UtilityTool.covertLonLat2XY(cugPos, cguCenterPos)
+
+            stFixPntData = FixPointData(fixpoint_id, fixpoint_name, cguCovertPos.x, cguCovertPos.y, eConflictType)
             FixPointDataDic.setdefault(fixpoint_id, stFixPntData)
         return FixPointDataDic
 
@@ -74,7 +79,10 @@ class DataService(object):
                 resultSecondSubList = self.pMsSql.execQuery(sqlSecondSub)
                 if (len(resultSecondSubList) == 1):
                     for fixpoint_id, icon_id, fixpoint_name, airport_id, type, x, y, z, is_waiting_point, fix_conflict_type in resultSecondSubList:
-                        stFixPointData = FixPointData(fixpoint_id, fixpoint_name, x, y, fix_conflict_type)
+                        cugPos = CguPos(x, y)
+                        cguCenterPos = CguPos(ConfigReader.dCenterLon, ConfigReader.dCenterLat)
+                        cguCovertPos = UtilityTool.covertLonLat2XY(cugPos, cguCenterPos)
+                        stFixPointData = FixPointData(fixpoint_id, fixpoint_name, cguCovertPos.x, cguCovertPos.y, fix_conflict_type)
                         vFixPnt.append(stFixPointData)
                         break
             stRoadData.vFixPnt = vFixPnt

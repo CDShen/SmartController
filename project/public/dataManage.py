@@ -27,8 +27,8 @@ class DataManager(object):
     def getFlightPlanAllPath(self, iStartID, iEndID):
         vPathData = []
         for k in self.PathDataDic:
-            if PathData[k].iStartFixID == iStartID and PathData[k].iEndFixID == iEndID:
-                vPathData.append(PathData[k])
+            if self.PathDataDic.get(k).iStartFixID == iStartID and self.PathDataDic.get(k).iEndFixID == iEndID:
+                vPathData.append(self.PathDataDic.get(k))
         return vPathData
     def getPathDataByID(self, iPathID):
         return self.PathDataDic.get(iPathID)

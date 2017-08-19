@@ -10,7 +10,7 @@ from math import *
 from ..public.dataObj import *
 from ..public.scenarioDataObj import *
 ##DataManager相互包含后续修改
-#from ..public.dataManage import DataManager
+# from ..public.dataManage import DataManager
 from ..public.config import ConfigReader
 import copy
 

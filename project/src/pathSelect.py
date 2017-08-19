@@ -8,11 +8,12 @@ from .flightPlan import FlightPlan
 from .taxiMap import TaxiMap
 from .qLearnCore import QLearnFunction
 from ..public.scenarioDataObj import *
+from ..public.config import ConfigReader
 
 class PathSelect(object):
-    def __init__(self, dThresholdScore, pFlightMgr):
+    def __init__(self, pFlightMgr):
         self.pFlightPlan = None
-        self.dThresholdScore = dThresholdScore ##路线最低分阈值
+        self.dThresholdScore = ConfigReader.dThresholdScore ##路线最低分阈值
         self.pTaxiMap = pFlightMgr.pTaxiMap
         self.pFlightMgr = pFlightMgr
         self.pDataManage = pFlightMgr.pDataManage

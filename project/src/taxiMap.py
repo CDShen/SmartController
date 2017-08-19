@@ -23,11 +23,11 @@ class TaxiMap(object):
 		self.taxiPathDic = {} ## 每个节点的滑行数据。格式{id:[NodeFlightPlanData...],....}
 		self.pDataManager = pDataManager
 		self.pFlightPlanMgr = pFlightPlanMgr
-		self.iResolveFligtPlanID = -1.0 ##内部可以解决冲突的飞行计划ID
+		self.iResolveFligtPlanID = -1 ##内部可以解决冲突的飞行计划ID
 		self.newFPPathData = None   ##内部可以解决从图的飞行计划新滑行路径
 
 	def clearResolveFlightPlanData(self):
-		self.iResolveFligtPlanID = -1.0
+		self.iResolveFligtPlanID = -1
 		self.newFPPathData = None
 	def getResolveFlightPlanData(self):
 		return  self.iResolveFligtPlanID, self.newFPPathData
@@ -42,6 +42,7 @@ class TaxiMap(object):
 				stNodeFlightPlanData = self.taxiPathDic.get(i)[j]
 				if stNodeFlightPlanData.iFlightPlanID == iFlightPlanID:
 					delData.append(j)
+			##只能移除值
 			for j in delData:
 				self.taxiPathDic.get(i).remove(delData[j])
 

@@ -18,18 +18,8 @@ class RoadData(BaseData):
 
 
 
-stRoadData = RoadData('a',[])
+a = [1,2,3,[1,2],5]
 
-stRoadData.vFixpnt.append(FixPnt(1,1))
-stRoadData.vFixpnt.append(FixPnt(2,1))
-stRoadData.vFixpnt.append(FixPnt(3,1))
-stRoadData.vFixpnt.append(FixPnt(4,1))
+a.remove(1)
 
-
-
-
-#for j in len(stRoadData.vFixpnt):
-#	print (stRoadData.vFixpnt[j].x)
-
-a = [3,2,1,5,6]
-print (max(a), min(a))
+print (a)
