@@ -30,7 +30,9 @@ class FlightPlanGen(object):
 				PathData = pDataManager.getMaxUseValPath(iStartFixID, iEndFIxID)
 				##转换为场景数据
 				FPPathData = FlightPlanGen._transDataObjData(PathData, iStartTime, pDataManager)
-				pFlightPlan = FlightPlan(stFlightPlanData , FPPathData)
+				strStartPosName = pDataManager.getFixPointByID(iStartFixID).strName
+				strEndPosName = pDataManager.getFixPointByID(iEndFIxID).strName
+				pFlightPlan = FlightPlan(stFlightPlanData , FPPathData,strStartPosName, strEndPosName)
 				pFlightPlanLst.append(pFlightPlan)
 			return pFlightPlanLst
 	#brief 将数据库数据转化为场景数据

@@ -29,7 +29,7 @@ class LearnFunction(object):
 class QLearnFunction(LearnFunction):
 	def __init__(self, pDataManager):
 		self.dBeta =ConfigReader.dBeta
-		self.QStateActionScoreDataLst = None
+		self.QStateActionScoreDataLst = []
 		self.pDataManager = pDataManager
 		self.pFlightPlan = FlightPlan
 
@@ -45,9 +45,10 @@ class QLearnFunction(LearnFunction):
 	def _reward(self, QStateData, eActionType, PathData, pConFlightPlan, ConflictData):
 		FPPath = None
 		dReward = 0.0
+		iStartTime = self.pFlightPlan.getFlightPlanStartTime()
 		dScore = 0.0 ##分数等于计划路线乘以系数
 		iOrgTotalTime = UtilityTool.getTotalPathTaxiTime(PathData)
-		curFPathData = self.pFlightPlan.getFlightPlanPath()
+		curFPathData  = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 		iStartTime = self.pFlightPlan.getFlightPlanStartTime()
 		conFPPathData = pConFlightPlan.getFlightPlanPath()
 		dTheta = ConfigReader.dTheta
@@ -75,9 +76,9 @@ class QLearnFunction(LearnFunction):
 		eActionType = QStateActionScoreData.QActionData
 		dReward ,FPPath, score = self._reward(QStateData, eActionType, PathData, pConFlightPlan ,ConflictData)
 
-		QStateActionScoreData.dScore = QStateActionScoreData.dScore *(1.0-self.beta) + self.beta*dReward
+		QStateActionScoreData.dScore = QStateActionScoreData.dScore *(1.0-self.dBeta) + self.dBeta*dReward
 		ScorePathDic['score'] = score
-		ScorePathDic['path'] = orgPath
+		ScorePathDic['orgPath'] = orgPath
 		ScorePathDic['FPPath'] = FPPath
 		ScorePathDic['qscore'] = QStateActionScoreData.dScore
 
@@ -97,9 +98,9 @@ class QLearnFunction(LearnFunction):
 		QStateActionScoreDataLst = []
 		iCount = 0
 		for i in range(len(self.QStateActionScoreDataLst)):
-			stQStateData = self.QStateActionScoreDataLst[i].QStateActionScoreData.QStateData
+			stQStateData = self.QStateActionScoreDataLst[i].QStateData
 			if stQStateData == QStateData:
-				QStateActionScoreDataLst.append(QStateActionScoreDataLst[i])
+				QStateActionScoreDataLst.append(self.QStateActionScoreDataLst[i])
 				iCount+=1
 				if iCount == 2:
 					bFind = True
@@ -119,10 +120,10 @@ class QLearnFunction(LearnFunction):
 					stQStateData = QStateData
 					eActionType = eAction
 					dScore = 1.0
-					QStateActionScoreData = QStateActionScoreData(stQStateData,eActionType,dScore)
+					stQStateActionScoreData = QStateActionScoreData(stQStateData,eActionType,dScore)
 					##添加到本地数据中
-					self.QStateActionScoreDataLst.append(QStateActionScoreData)
-					QStateActionScoreDataLst.append(QStateActionScoreData)
+					self.QStateActionScoreDataLst.append(stQStateActionScoreData)
+					QStateActionScoreDataLst.append(stQStateActionScoreData)
 				return QStateActionScoreDataLst
 		else:
 			return 	QStateActionScoreDataLst
@@ -148,7 +149,7 @@ class QLearnFunction(LearnFunction):
 		QStateActionScoreDataLst = self._findQState(QStateData)
 		ScorePathDicLst = []
 		for i in range(len(QStateActionScoreDataLst)):
-			ScorePathDic = self._updateQValue(self, QStateActionScoreDataLst[i], PathData,pConFlightPlan, ConflictData)
+			ScorePathDic = self._updateQValue(QStateActionScoreDataLst[i], PathData,pConFlightPlan, ConflictData)
 			ScorePathDicLst.append(ScorePathDic)
 
 
@@ -167,9 +168,9 @@ class QLearnFunction(LearnFunction):
 				break
 
 		dMaxScore = ScorePathDicLst[0].get('score')
-		bestPath = ScorePathDicLst[0].get('path')
-		dFPPath = None
-		return dMaxScore,bestPath,dFPPath
+		orgPath = ScorePathDicLst[0].get('orgPath')
+		dFPPath = ScorePathDicLst[0].get('FPPath')
+		return dMaxScore,orgPath,dFPPath
 
 	def getQStateActionData(self):
 		return self.QStateActionScoreDataLst

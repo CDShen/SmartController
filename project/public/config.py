@@ -25,13 +25,14 @@ from configparser import ConfigParser
 ##dSafeDis->减速运动和停止时候的最小安全距离
 ##iResolveConfilictTime->过点多少时间后才认为解决冲突
 ##dNonePathFine->没有解决冲突时候的惩罚值
+##dNormalTaxSpd->正常滑行速度
 ##remark
 
 
 class ConfigReader(BaseData):
 	_fields = ['strIP', 'strUser','strPwd','strDbName','strTrainDataPath','dCenterLon','dCenterLat','iFlightPlanNum','iWorkState','bNeedShow', 'iStepCount',\
 	           'dThresholdScore', 'iFutureTimeMin', 'iConflictTimeThread','dBeta','dTheta'\
-	           'dSlowMinSpd', 'dSafeDis', 'iResolveConfilictTime', 'dNonePathFine']
+	           'dSlowMinSpd', 'dSafeDis', 'iResolveConfilictTime', 'dNonePathFine', 'dNormalTaxSpd']
 
 	@classmethod
 	def loadConfig(cls):
@@ -63,6 +64,7 @@ class ConfigReader(BaseData):
 		ConfigReader.dSafeDis = cfg.getint('Para', 'dSafeDis')
 		ConfigReader.iResolveConfilictTime = cfg.getint('Para', 'iResolveConfilictTime')
 		ConfigReader.dNonePathFine = cfg.getfloat('Para', 'dNonePathFine')
+		ConfigReader.dNormalTaxSpd = cfg.getfloat('Para', 'dNormalTaxSpd')
 
 
 		return True

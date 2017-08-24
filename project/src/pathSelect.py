@@ -17,7 +17,7 @@ class PathSelect(object):
         self.pTaxiMap = pFlightMgr.pTaxiMap
         self.pFlightMgr = pFlightMgr
         self.pDataManage = pFlightMgr.pDataManage
-        self.pQLearnFunction = QLearnFunction(pFlightMgr)
+        self.pQLearnFunction = QLearnFunction(pFlightMgr.pDataManage)
 
     def setCurFlightPlan(self, pFlightPlan):
         self.pFlightPlan = pFlightPlan
@@ -53,14 +53,17 @@ class PathSelect(object):
         dMaxScore = ScorePathLst[0].get('score')
         bestProperFPPath = ScorePathLst[0].get('FPPath')
 
+
+        if bestProperFPPath == None:
+            print ('呼号={0}查找不到路线'.format(CurFlightPlanData.strName))
         ##如果分数小于阈值，重新寻路获取值
         if dMaxScore < self.dThresholdScore:
+            print ('呼号={0}分数过低,当前分数为{1},当前阈值为{2}'.format(CurFlightPlanData.strName,dMaxScore,self.dThresholdScore))
             ##可以先不做，因为地图小，可以穷举出可能路径
             ##添加错误信息
-            pass
+            self.path = self.pFlightPlan.setBestProperPath(bestProperFPPath)
         else:
-            self.pFlightPlan.setBestProperPath(bestProperFPPath)
-
+            self.path = self.pFlightPlan.setBestProperPath(bestProperFPPath)
 
     ##返回dict
     def _pathScore(self, PathData):
@@ -71,12 +74,12 @@ class PathSelect(object):
         FPPath = None
 
         eResolveType, ConflictData  = self.pTaxiMap.calConflictType(self.pFlightPlan, PathData)
-        if eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_NONE.value:
+        if eResolveType == E_RESOLVE_TYPE.E_RESOLVE_NONE:
             dScore = UtilityTool.getTotalPathTaxiTime(PathData)
             orgPath = PathData
             FPPath = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 
-        elif eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_INNER.value:
+        elif eResolveType == E_RESOLVE_TYPE.E_RESOLVE_INNER:
             iFlightPlanID, FPPathData =  self.pTaxiMap.getResolveFlightPlanData()
             self.pFlightMgr.getFlightPlanByID(iFlightPlanID).setBestProperPath(FPPathData)
             self.pTaxiMap.clearResolveFlightPlanData()
@@ -84,7 +87,7 @@ class PathSelect(object):
             orgPath = PathData
             FPPath = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 
-        elif eResolveType.value == E_RESOLVE_TYPE.E_RESOLVE_QFUN.value:
+        elif eResolveType == E_RESOLVE_TYPE.E_RESOLVE_QFUN:
             ##交给Q函数处理
             self.pQLearnFunction.setCurFlightPlan(self.pFlightPlan)
             pConFlightPlan = self.pFlightMgr.getFlightPlanByID(ConflictData.iConfFPID)

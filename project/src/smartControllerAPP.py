@@ -18,12 +18,7 @@ class SmartControllerAPP(object):
             print ('数据库启动失败')
             return False
 
-    ##test地图显示
-        # self.pMapCtrl = MapCtrl()
-        # self.pMapCtrl.setRoadData(self.pDataManager.getRoadDataDic())
-        # self.pMapCtrl.showData()
-        # return
-    ##test_end
+
         ##根据配置文件产生对应飞行计划，现在是读取所有的产生的.csv文件
         # n = ConfigReader.iFlightPlanNum
         pFlightPlanMgr = FlightPlanMgr(self.pDataManager)
@@ -39,6 +34,8 @@ class SmartControllerAPP(object):
         ##公共转换中需要DataManager获取某些数据
         UtilityTool.pDataManager = self.pDataManager
 
+        self.pMapCtrl = MapCtrl(pFlightPlanMgr)
+        self.pMapCtrl.setRoadData(self.pDataManager.getRoadDataDic())
 
         return True
 
@@ -64,11 +61,13 @@ class SmartControllerAPP(object):
             print ('存储数据失败')
 
 
-        #
-        # ##演示滑行
-        # if ConfigReader.bNeedShow == True:
-        #     ##滑行结果显示
-        #     pass
+
+        ##演示滑行
+        if ConfigReader.bNeedShow == True:
+            ##test地图显示
+            self.pMapCtrl.showData()
+            # test_end
+
 
 
 

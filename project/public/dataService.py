@@ -51,8 +51,8 @@ class DataService(object):
         pathDataDic = {}
         sql = 'select * from path'
         resultList = self.pMsSql.execQuery(sql)
-        for path_id, path_name, start_fix_id, end_fix_id, ues_num in resultList:
-            stPathData = PathData(path_id, path_name, start_fix_id, end_fix_id, ues_num, [])
+        for path_id, path_name, start_fix_id, end_fix_id, use_num in resultList:
+            stPathData = PathData(path_id, path_name, start_fix_id, end_fix_id, use_num, [])
             sqlSub = 'select * from path_pass_info where path_id = {0} order by path_id, sequence'.format(path_id)
             resultSubList = self.pMsSql.execQuery(sqlSub)
             vPassPntData = []
@@ -90,12 +90,15 @@ class DataService(object):
         return roadDataDic
 
     def saveQStateData(self, QStateActionScoreDataLst):
+        if QStateActionScoreDataLst == None:
+            return
+
         for i in range(len(QStateActionScoreDataLst)):
-            stQStateData = QStateActionScoreData[i].QStateData
-            stQActionData = QStateActionScoreData[i].QActionData
-            dScore = QStateActionScoreData[i].dScore
+            stQStateData = QStateActionScoreDataLst[i].QStateData
+            stQActionData = QStateActionScoreDataLst[i].QActionData
+            dScore = QStateActionScoreDataLst[i].dScore
             ##先删除存在的Q数据
-            sql = 'DELETE  FROM  qsate_info WHERE start_fix_id = {0} AND end_fix_id = {1} AND conflict_fix_id ={2}\
+            sql = 'DELETE  FROM  qstate_info WHERE start_fix_id = {0} AND end_fix_id = {1} AND conflict_fix_id ={2}\
             AND fix_pnt_type = {3} AND cur_flight_type = {4} AND conflict_flight_type = {5} \
             AND conflict_type = {6} AND path_id = {7} AND con_path_id = {8}  AND action_type = {9}' \
             .format(stQStateData.iStartFixID, stQStateData.iEndFixID,stQStateData.iConflictFixID, stQStateData.efixPntType.value,\
@@ -111,6 +114,8 @@ class DataService(object):
 
 
     def savePathData(self, PathIDLst):
+        if PathIDLst == None:
+            return
         for i in range(len(PathIDLst)):
             iID = PathIDLst[i]
             sql = 'UPDATE path SET use_num = use_num + 1 WHERE path_id = {0}'.format(iID)
