@@ -26,13 +26,14 @@ from configparser import ConfigParser
 ##iResolveConfilictTime->过点多少时间后才认为解决冲突
 ##dNonePathFine->没有解决冲突时候的惩罚值
 ##dNormalTaxSpd->正常滑行速度
+##iAddFlgihtPlanTime->冲突发生在起点会后航班每次推迟时间
 ##remark
 
 
 class ConfigReader(BaseData):
 	_fields = ['strIP', 'strUser','strPwd','strDbName','strTrainDataPath','dCenterLon','dCenterLat','iFlightPlanNum','iWorkState','bNeedShow', 'iStepCount',\
 	           'dThresholdScore', 'iFutureTimeMin', 'iConflictTimeThread','dBeta','dTheta'\
-	           'dSlowMinSpd', 'dSafeDis', 'iResolveConfilictTime', 'dNonePathFine', 'dNormalTaxSpd']
+	           'dSlowMinSpd', 'dSafeDis', 'iResolveConfilictTime', 'dNonePathFine', 'dNormalTaxSpd', 'iAddFlgihtPlanTime']
 
 	@classmethod
 	def loadConfig(cls):
@@ -60,11 +61,11 @@ class ConfigReader(BaseData):
 		ConfigReader.iConflictTimeThread = cfg.getint('Para', 'iConflictTimeThread')
 		ConfigReader.dBeta = cfg.getfloat('Para', 'dBeta')
 		ConfigReader.dTheta = cfg.getfloat('Para', 'dTheta')
-		ConfigReader.dSlowMinSpd = cfg.getint('Para', 'dSlowMinSpd')
+		ConfigReader.dSlowMinSpd = cfg.getfloat('Para', 'dSlowMinSpd')
 		ConfigReader.dSafeDis = cfg.getint('Para', 'dSafeDis')
 		ConfigReader.iResolveConfilictTime = cfg.getint('Para', 'iResolveConfilictTime')
 		ConfigReader.dNonePathFine = cfg.getfloat('Para', 'dNonePathFine')
 		ConfigReader.dNormalTaxSpd = cfg.getfloat('Para', 'dNormalTaxSpd')
-
+		ConfigReader.iAddFlgihtPlanTime = cfg.getint('Pata', 'iAddFlgihtPlanTime')
 
 		return True

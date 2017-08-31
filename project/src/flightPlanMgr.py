@@ -3,6 +3,8 @@ from .taxiMap import TaxiMap
 from .flightPlanGen import FlightPlanGen
 from .flightPlan import FlightPlan
 from ..public.dataManage import DataManager
+from math import *
+from ..public.config import ConfigReader
 
 class FlightPlanMgr(object):
     def __init__(self, pDataManager):
@@ -58,6 +60,9 @@ class FlightPlanMgr(object):
             PathIDLst.append(FPPathData.iPathID)
         return PathIDLst
 
+    def addCurPath2TaxMap(self):
+        pCurFlightPlan = self.curFlightPlanDic.get(self.iCurFlanID)
+        self.pTaxiMap.addFlightPlanPath(pCurFlightPlan)
 
     def addFutureFlightPlan(self, iTime):
         ##当前计划
@@ -128,3 +133,20 @@ class FlightPlanMgr(object):
                 ActiveFightPlanLst.append(pFlightPlan)
         return ActiveFightPlanLst
 
+    ##判断经过学习后仍然后冲突
+    def judgeIsHasConflict(self):
+        PntPassTimeDic = {}
+        ##过节点时间小于则规定值则仍为有冲突
+        for k in self.FlightPlanDic:
+            pFlightPlan = self.FlightPlanDic.get(k)
+            stFPPathData = pFlightPlan.getFlightPlanPath()
+            for m in range(len(stFPPathData.vFPPassPntData)):
+                stPassFixData = stFPPathData.vFPPassPntData[m]
+                if PntPassTimeDic.get(stPassFixData.iFixID) == None:
+                    PntPassTimeDic.setdefault(stPassFixData.iFixID, [stPassFixData.iRealPassTime])
+                else:
+                    for i in range(len(PntPassTimeDic.get(stPassFixData.iFixID))):
+                        iRealPassTime = PntPassTimeDic.get(stPassFixData.iFixID)[i]
+                        if  fabs(stPassFixData.iRealPassTime - iRealPassTime) < ConfigReader.iResolveConfilictTime:
+                            print('仍然存在过点时间冲突，当前时间阈值{0}'.format(ConfigReader.iResolveConfilictTime))
+                    PntPassTimeDic.get(stPassFixData.iFixID).append(stPassFixData.iRealPassTime)

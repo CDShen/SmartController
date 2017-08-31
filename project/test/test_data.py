@@ -37,4 +37,4 @@ a.remove(2)
 a.remove(3)
 a.remove(4)
 a=None
-print (a)
+print (fabs(-1))

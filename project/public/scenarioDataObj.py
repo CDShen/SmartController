@@ -97,7 +97,7 @@ class E_RESOLVE_TYPE(Enum):
 	E_RESOLVE_NONE = 1  ##不需要处理冲突
 	E_RESOLVE_INNER = 2  ##内部解决冲突
 	E_RESOLVE_QFUN = 3  ##通过Q函数解决
-
+	E_RESOLVE_ADDTIME = 4 ##冲突发生在起始点需要后续航班延后
 
 
 

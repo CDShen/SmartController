@@ -1,5 +1,4 @@
 from ..public.scenarioDataObj import *
-from .taxSimulator import TaxSimulator
 from .utility import MathUtilityTool
 from ..public.config import ConfigReader
 
@@ -12,6 +11,14 @@ class FlightPlan(object):
 		self.eStatus = ENUM_FP_STATUS.E_STATUS_FUTURE
 		self.strStartPosName = strStartPosName
 		self.strEndPosName = strEndPosName
+		self.iWaitTime = 0
+
+	##设置等待时间，如果冲突发生在起点就需要修改起始时间
+	def setWaitTime(self, iTime):
+		self.iWaitTime = iTime
+	def getWaitTime(self):
+		return self.iWaitTime
+
 	#brief获取最佳的滑行路线
 	def setBestProperPath(self, FPPathData):
 		self.FPPathData = FPPathData
@@ -23,8 +30,6 @@ class FlightPlan(object):
 
 	def getFlightPlanData(self):
 		return self.FlightPlanData
-	def setTaxState(self, FPPathData):
-		self.TaxState = TaxSimulator(self, FPPathData)
 
 	##brief 飞行计划计算，看是否完成已经结束
 	##dframe 计算帧率
@@ -68,7 +73,7 @@ class FlightPlan(object):
 		return self.FlightPlanData.iID
 
 	def isFutureFlightPlan(self):
-		if self.eStatus.value == ENUM_FP_STATUS.E_STATUS_FUTURE.value:
+		if self.eStatus == ENUM_FP_STATUS.E_STATUS_FUTURE:
 			return  True
 		else:
 			return  False
@@ -88,7 +93,7 @@ class FlightPlan(object):
 				ePassPntType = stNextPassPntData.ePassPntType
 				if ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL:
 					cguPos = MathUtilityTool.getPosBySpdTime(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), CguPos(stNextPassPntData.x,stNextPassPntData.y), \
-															 iTime-stFirstPassPntData.iRealPassTime, ConfigReader.dNormalTaxSpd/3.6)
+															 iTime-stFirstPassPntData.iRealPassTime, ConfigReader.dNormalTaxSpd)
 
 				elif ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
 					pass

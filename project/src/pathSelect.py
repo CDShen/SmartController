@@ -80,6 +80,7 @@ class PathSelect(object):
             FPPath = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 
         elif eResolveType == E_RESOLVE_TYPE.E_RESOLVE_INNER:
+            ##其他飞机避让
             iFlightPlanID, FPPathData =  self.pTaxiMap.getResolveFlightPlanData()
             self.pFlightMgr.getFlightPlanByID(iFlightPlanID).setBestProperPath(FPPathData)
             self.pTaxiMap.clearResolveFlightPlanData()
@@ -91,6 +92,7 @@ class PathSelect(object):
             ##交给Q函数处理
             self.pQLearnFunction.setCurFlightPlan(self.pFlightPlan)
             pConFlightPlan = self.pFlightMgr.getFlightPlanByID(ConflictData.iConfFPID)
+            ##dscore为一个综合值，并不只是解决冲突时间
             dScore, orgPath ,FPPath= self.pQLearnFunction.pathSelect(self.pFlightPlan, PathData, pConFlightPlan, ConflictData)
 
         ScorePathDic['score'] = dScore

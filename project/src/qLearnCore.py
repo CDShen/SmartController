@@ -51,7 +51,6 @@ class QLearnFunction(LearnFunction):
 		curFPathData  = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 		iStartTime = self.pFlightPlan.getFlightPlanStartTime()
 		conFPPathData = pConFlightPlan.getFlightPlanPath()
-		dTheta = ConfigReader.dTheta
 
 		FPPath = UtilityTool.resolveConflictByAction(curFPathData, conFPPathData, ConflictData, eActionType)
 
@@ -60,7 +59,8 @@ class QLearnFunction(LearnFunction):
 			dReward = ConfigReader.dNonePathFine
 		else:
 			iConflictTime = UtilityTool.getTotalFPTaxiTime(iStartTime,FPPath)
-			dRatio = dTheta*(iConflictTime/iOrgTotalTime) + (1-dTheta)*self.pDataManager.getPathAverageRatio(PathData.iPathID)
+			##
+			dRatio = ConfigReader.dTheta*(iConflictTime/iOrgTotalTime) + (1.0-ConfigReader.dTheta)*self.pDataManager.getPathAverageRatio(PathData.iPathID)
 			dReward = 1/dRatio
 			dScore  = iOrgTotalTime * dReward
 

@@ -154,13 +154,14 @@ class UtilityTool(object):
                 cguPos2 = CguPos(curFPathData.vFPPassPntData[i+1].x, curFPathData.vFPPassPntData[i+1].y)
                 dTotalDis += MathUtilityTool.Distance(cguPos1, cguPos2)
 
-        if eActionType.value == ENUM_QACTION_TYPE.E_ACTION_SLOWDOWN.value:
+        if eActionType == ENUM_QACTION_TYPE.E_ACTION_SLOWDOWN:
             dDis = (dTotalDis-ConfigReader.dSafeDis)
             iTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime - \
                     curFPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
             dSpd = dDis/iTime
             ##减速每段增加时间
             iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
+            print ('Q学习中减速动作速度小于最小阈值={0} m/s'.format(ConfigReader.dSlowMinSpd))
             if dSpd < ConfigReader.dSlowMinSpd:
                 return None
             else:
@@ -178,7 +179,7 @@ class UtilityTool(object):
                         newPath.vFPPassPntData.append(stFPPassPntData)
 
 
-        elif eActionType.value == ENUM_QACTION_TYPE.E_ACTION_STOP.value:
+        elif eActionType == ENUM_QACTION_TYPE.E_ACTION_STOP:
             for i in range(len(curFPathData.vFPPassPntData)):
                 if i < iFirstCommonStartIndex:
                     newPath.vFPPassPntData.append(copy.deepcopy(curFPathData.vFPPassPntData[i]))
@@ -190,6 +191,25 @@ class UtilityTool(object):
                     newPath.vFPPassPntData.append(stFPPassPntData)
 
         return newPath
+
+    ##是否最初冲突时在起点
+    @classmethod
+    def isConflictAtStart(cls, curFPathData, conFPPathData, ConflictData):
+        bIsConAtStart = False
+        newPath = copy.deepcopy(conFPPathData)
+        ##清空lst
+        newPath.vFPPassPntData = []
+        iConFixID = ConflictData.iConflictFixID
+        iFirstStartIndex = -1
+        iSecondStartFixIDIndex = -1
+
+        for i in range(len(curFPathData.vFPPassPntData)):
+            if curFPathData.vFPPassPntData[i].iFixID == iConFixID:
+                iFirstStartIndex = i
+                if iFirstStartIndex == 0:
+                    return True
+        return bIsConAtStart
+
     # brief:解决冲突并返回冲突后的路径滑行时间
     # iStartTime:[in] 当前开始滑行时间
     # FPPathData:[in] 冲突滑行路线
@@ -223,8 +243,9 @@ class UtilityTool(object):
 
         return  eConflictType
 
+    ##如果在初始点发生冲突则需要等待
     @classmethod
-    def transPathData2FPPathData(self, iStartTime, PathData):
+    def transPathData2FPPathData(self, iStartTime, PathData , iWaitTime = 0):
         vstFPPassPntData = []
         for i in range(len(PathData.vPassPntData)):
             stFixPointData = self.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID)

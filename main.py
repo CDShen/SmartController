@@ -11,12 +11,16 @@ def mainApp():
 	##根据训练计划组数进行训练
 	iFileCount = fileTool.find_file_num(ConfigReader.strTrainDataPath)
 
+
 	for i in range(iFileCount):
+		bLast = False
+		if i == iFileCount - 1:
+			bLast = True
 		theApp =  SmartControllerAPP()
 		if theApp.init(i) == False:
 			print ('程序初始化错误')
 
-		theApp.run()
+		theApp.run(bLast)
 		print('train process {0}/{1}'.format(i+1,iFileCount))
 
 

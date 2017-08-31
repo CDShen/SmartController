@@ -52,7 +52,7 @@ class SmartControllerAPP(object):
             print('保存数据库失败')
             return False
 
-    def run(self):
+    def run(self, bLast = False):
         ##开始工作
         self.pWorkState.doWork()
 
@@ -63,7 +63,7 @@ class SmartControllerAPP(object):
 
 
         ##演示滑行
-        if ConfigReader.bNeedShow == True:
+        if ConfigReader.bNeedShow == True and bLast == True:
             ##test地图显示
             self.pMapCtrl.showData()
             # test_end

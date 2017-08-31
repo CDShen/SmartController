@@ -140,7 +140,7 @@ class TaxiMap(object):
 					self.newFPPathData = newPath
 					return E_RESOLVE_TYPE.E_RESOLVE_INNER
 
-		##可能有问题 待修改shenjk
+		##当前冲突类型和固定点冲突类型值一致
 		elif eCurFlightPlanType != eConFlightPlanType and eCurFlightPlanType.value == eConFixType.value:
 			if bIsFuturePlan == True:
 				##不需要处理
@@ -183,15 +183,16 @@ class TaxiMap(object):
 			##还有相同滑行节点没有考虑
 			##！！地面节点中没有自己的数据！！
 			AdjNodeLst = self._getAdjNode(stNextPassPntData.iFixID)
+
+			##首先处理有相反情况的,目前只处理一次
 			for j in range(len(AdjNodeLst)):
-				##相反节点A->B 与 B->A
 				if AdjNodeLst[j] == stPassPntData.iFixID:
 					##AdjNodeFlightPlanDataLst:固定点的所有飞行计划和过点时间
 					AdjNodeFlightPlanDataLst = self._getNodePassPnt(AdjNodeLst[j])
 					if AdjNodeFlightPlanDataLst == None:
 						continue
 
-					TmpNodeFlightPlanDataLst = [] ## [[1,2], [1,2]]两个点都需要知道
+					TmpNodeFlightPlanDataLst = []  ## [[1,2], [1,2]]两个点都需要知道
 
 					for k in range(len(AdjNodeFlightPlanDataLst)):
 						for m in range(len(NodeFlightPlanDataLst)):
@@ -205,6 +206,8 @@ class TaxiMap(object):
 					iFirstTime = stPassPntData.iRelaPassTime + iStartTime
 					iFirstTimeNext = stNextPassPntData.iRelaPassTime + iStartTime
 					##冲突超过2个需要警告
+					if len(TmpNodeFlightPlanDataLst) > 1:
+						print ('warning:在相反节点中，存在潜在冲突对={0}'.format(len(TmpNodeFlightPlanDataLst)))
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iSecondTime = TmpNodeFlightPlanDataLst[k][0].iRealPassTime
 						iSecondTimeNext = TmpNodeFlightPlanDataLst[k][1].iRealPassTime
@@ -220,19 +223,19 @@ class TaxiMap(object):
 
 							iFirstPassTime = iFirstTimeNext
 							iSecondPassTime = iSecondTime
-							iCountNum+=1
-							if iCountNum == 2:
-								##添加日志
-								pass
-							stConflictData = ConflictData(pFlightPlan.getFlightPlanID(),iConFlightPlanID,\
-							E_CONFLICT_TYPE.E_CONFLICT_CROSS,eFixPntType ,stNextPassPntData.iFixID,iCurPathID, \
-							iConPathID, iFirstPassTime, iSecondPassTime  )
-							##有冲突，继续判断是否需要Q函数解决
-							return  self._judgeNeedQFunResolveCon(pFlightPlan, PathData,\
-							        pConFlightPlan,stConflictData), stConflictData
 
-				##如果后续节点不相等
-				else: ##  AdjNodeLst[j] == stPassPntData.iFixID:
+							stConflictData = ConflictData(pFlightPlan.getFlightPlanID(), iConFlightPlanID, \
+														  E_CONFLICT_TYPE.E_CONFLICT_CROSS, eFixPntType,
+														  stNextPassPntData.iFixID, iCurPathID, \
+														  iConPathID, iFirstPassTime, iSecondPassTime)
+							##有冲突，继续判断是否需要Q函数解决
+							return self._judgeNeedQFunResolveCon(pFlightPlan, PathData, \
+																 pConFlightPlan, stConflictData), stConflictData
+
+			for j in range(len(AdjNodeLst)):
+				##相反节点A->B 与 B->A
+				##处理不相等情况
+				if AdjNodeLst[j] != stPassPntData.iFixID:
 					AdjNodeFlightPlanDataLst = self._getNodePassPnt(AdjNodeLst[j])
 					TmpNodeFlightPlanDataLst = []
 
@@ -249,6 +252,9 @@ class TaxiMap(object):
 								TmpNodeFlightPlanDataPair.append(NodeFlightPlanDataLst[m])
 								TmpNodeFlightPlanDataLst.append(TmpNodeFlightPlanDataPair)
 
+					##冲突超过2个需要警告
+					if len(TmpNodeFlightPlanDataLst) > 1:
+						print('warning:在不同节点中，存在潜在冲突对={0}'.format(len(TmpNodeFlightPlanDataLst)))
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iPassTime = iStartTime + stNextPassPntData.iRelaPassTime
 						iSecondTime = TmpNodeFlightPlanDataLst[k][0].iRealPassTime
@@ -259,10 +265,6 @@ class TaxiMap(object):
 							continue
 
 						if fabs(iPassTime - iSecondTimeNext) < ConfigReader.iConflictTimeThread:
-							iCountNum+=1
-							if iCountNum == 2:
-								##添加日志
-								pass
 							##有冲突，继续判断是否需要Q函数解决
 							iConFlightPlanID = TmpNodeFlightPlanDataLst[k][0].iFlightPlanID
 							pConFlightPlan = self.pFlightPlanMgr.getFlightPlanByID(iConFlightPlanID)
