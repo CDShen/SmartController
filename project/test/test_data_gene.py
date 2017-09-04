@@ -37,7 +37,7 @@ class FlyPlanGen(object):
     DepStartFixLst = []
     DepEndFixLst = []
     CallSignLst = []
-    iInterval = 0
+    dInterval = 0.0
     iTotalNum = 50
     iGroupNum = 1
     strSavePath  = None
@@ -81,7 +81,7 @@ class FlyPlanGen(object):
             self.CallSignLst.append(str(i))
 
         self.strSavePath = cfg.get('DataBase', 'Path')
-        self.iInterval = cfg.getint('DataBase', 'Interval')
+        self.dInterval = cfg.getfloat('DataBase', 'Interval')
         self.iTotalNum = cfg.getint('DataBase', 'TotalNum')
         self.iGroupNum = cfg.getint('DataBase', 'GroupNum')
 
@@ -105,14 +105,14 @@ class FlyPlanGen(object):
                     oneFlyPlanData.append(j+1)
                     oneFlyPlanData.append(strCallsign)
                     oneFlyPlanData.append(1)
-                    oneFlyPlanData.append(self.iInterval * 60 * j)
+                    oneFlyPlanData.append(int(self.dInterval * 60.0 * j))
                     oneFlyPlanData.append(random.choice(self.ArrStartFixLst))
                     oneFlyPlanData.append(random.choice(self.ArrEndFixLst))
                 else:
                     oneFlyPlanData.append(j+1)
                     oneFlyPlanData.append(strCallsign)
                     oneFlyPlanData.append(2)
-                    oneFlyPlanData.append(self.iInterval * 60 * j)
+                    oneFlyPlanData.append(int(self.dInterval * 60.0 * j))
                     oneFlyPlanData.append(random.choice(self.DepStartFixLst))
                     oneFlyPlanData.append(random.choice(self.DepEndFixLst))
 
@@ -134,3 +134,4 @@ pFlyPlanGene = FlyPlanGen()
 pFlyPlanGene.readConfig()
 pFlyPlanGene.geneFlyPlanData()
 pFlyPlanGene.save()
+print ('data create sucessfully')

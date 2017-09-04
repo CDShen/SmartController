@@ -91,13 +91,18 @@ class FlightPlan(object):
 			stNextPassPntData = self.FPPathData.vFPPassPntData[i+1]
 			if iTime >=  stFirstPassPntData.iRealPassTime and iTime < stNextPassPntData.iRealPassTime:
 				ePassPntType = stNextPassPntData.ePassPntType
-				if ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL:
-					cguPos = MathUtilityTool.getPosBySpdTime(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), CguPos(stNextPassPntData.x,stNextPassPntData.y), \
-															 iTime-stFirstPassPntData.iRealPassTime, ConfigReader.dNormalTaxSpd)
+				dSpd = ConfigReader.dNormalTaxSpd
+				##如果是减速要重新计算减速度
+				if ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN:
+					dSpd = MathUtilityTool.distance(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
+				        CguPos(stNextPassPntData.x,stNextPassPntData.y))/(stNextPassPntData.iRealPassTime/stFirstPassPntData.iRealPassTime)
 
-				elif ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
-					pass
-				elif ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
-					pass
+				cguPos = MathUtilityTool.getPosBySpdTime(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
+				        CguPos(stNextPassPntData.x,stNextPassPntData.y),iTime-stFirstPassPntData.iRealPassTime,dSpd , ePassPntType)
+
+				# elif ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
+				# 	print('停止等待')
+				# elif ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN:
+				# 	print ('减速通过')
 
 				return cguPos

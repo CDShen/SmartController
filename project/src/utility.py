@@ -17,12 +17,12 @@ import copy
 
 class MathUtilityTool(object):
     @classmethod
-    def Distance(cls, CguPos1,CguPos2):
+    def distance(cls, CguPos1, CguPos2):
         dis = sqrt(pow((CguPos1.x - CguPos2.x),2) +  pow((CguPos1.y - CguPos2.y),2))
         return dis
     @classmethod
     def GetUnitVec(cls, CguPos1):
-        dis = MathUtilityTool.Distance(CguPos1, CguPos(0,0))
+        dis = MathUtilityTool.distance(CguPos1, CguPos(0, 0))
         return CguPos(CguPos1.x/dis, CguPos1.y/dis)
 
     @classmethod
@@ -34,17 +34,28 @@ class MathUtilityTool(object):
 
     @classmethod
     def getUnitVec(cls,CguPosS,CguPosE):
-        dis = MathUtilityTool.Distance(CguPosS, CguPosE)
+        dis = MathUtilityTool.distance(CguPosS, CguPosE)
         CguVec = CguPos(CguPosE.x - CguPosS.x, CguPosE.y - CguPosS.y)
         return CguPos(CguVec.x/dis, CguVec.y/dis)
 
     @classmethod
-    def getPosBySpdTime(cls, CguPosS, CguPosE, iTime, dSpd):
+    def getPosBySpdTime(cls, CguPosS, CguPosE, iTime, dSpd, ePassTYPE):
         cguData = CguPos(0,0)
         cguVec = MathUtilityTool.getUnitVec(CguPosS, CguPosE)
         dis = iTime * dSpd
         cguData.x = CguPosS.x + dis*cguVec.x
         cguData.y = CguPosS.y + dis*cguVec.y
+
+        if ePassTYPE == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
+            cguStop = CguPos(0,0)
+            cguStop.x = CguPosE.x - ConfigReader.dSafeDis * cguVec.x
+            cguStop.y = CguPosE.y - ConfigReader.dSafeDis * cguVec.y
+            cguVecStop = MathUtilityTool.getUnitVec(cguData, cguStop)
+            dFlag = cguVecStop.x*cguVec.x + cguVecStop.y*cguVec.y
+            ##反向
+            if dFlag <= 0.0:
+                cguData = cguStop
+
         return cguData
 
 class UtilityTool(object):
@@ -83,16 +94,18 @@ class UtilityTool(object):
         iFirstCommonStartIndex = iFirstStartIndex
         iSecCommonStartIndex = iSecondStartFixIDIndex
         for i in range(iFirstStartIndex+1, len(curFPathData.vFPPassPntData)):
-            if iSecondStartFixIDIndex - j <= 0:
+            if iSecondStartFixIDIndex - j < 0:
                 break
 
             if curFPathData.vFPPassPntData[i].iFixID == conFPPathData.vFPPassPntData[iSecondStartFixIDIndex-j].iFixID:
-                j+=1
                 iFirstCommonStartIndex = i
+                j += 1
                 iSecCommonStartIndex = iSecondStartFixIDIndex-j
             else:
                 break
 
+        if iSecCommonStartIndex == 0:
+            print('Error:不会出现初始点冲突情况')
         ##获得公共节点的过点时间
         iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
         iDiffTime = -1
@@ -102,7 +115,8 @@ class UtilityTool(object):
             elif i == iSecCommonStartIndex:
                 stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
                 iOrgTime = conFPPathData.vFPPassPntData[i].iRealPassTime
-                iNewTime = iCommonConPassPntTime + 20
+                ##时间可能有问题，待修改
+                iNewTime = iCommonConPassPntTime + ConfigReader.iResolveConfilictTime
                 iDiffTime = iNewTime - iOrgTime
                 stFPPassPntData.iRealPassTime = iNewTime ##默认添加20s
                 newPath.vFPPassPntData.append(stFPPassPntData)
@@ -112,6 +126,7 @@ class UtilityTool(object):
                 newPath.vFPPassPntData.append(stFPPassPntData)
         return newPath
 
+    ##Q学习解决动作方式
     @classmethod
     def resolveConflictByAction(cls, curFPathData, conFPPathData ,ConflictData, eActionType):
         newPath = copy.deepcopy(curFPathData)
@@ -129,21 +144,26 @@ class UtilityTool(object):
             if conFPPathData.vFPPassPntData[i].iFixID == iConFixID:
                 iSecondStartFixIDIndex = i
                 break
+
+        if iFirstStartIndex == 0:
+            print('Error:Q学习中不会出现初始点冲突情况')
         ##查找到最开始的公共冲突点
         j=1
         iFirstCommonStartIndex = iFirstStartIndex
         iSecCommonStartIndex = iSecondStartFixIDIndex
         for i in range(iSecondStartFixIDIndex+1, len(conFPPathData.vFPPassPntData)):
-            if iFirstCommonStartIndex - j <= 0:
+            if iFirstStartIndex - j < 0:
                 break
 
             if curFPathData.vFPPassPntData[iFirstStartIndex-j].iFixID == conFPPathData.vFPPassPntData[i].iFixID:
-                j+=1
                 iFirstCommonStartIndex = iFirstStartIndex-j
+                j += 1
                 iSecCommonStartIndex = i
             else:
                 break
 
+        if iFirstCommonStartIndex == 0:
+            print ('Error:Q学习中不会出现初始点冲突情况')
         ##获得公共节点的过点时间
         dTotalDis = 0.0
         iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
@@ -152,7 +172,7 @@ class UtilityTool(object):
             if i < iFirstCommonStartIndex:
                 cguPos1 = CguPos(curFPathData.vFPPassPntData[i].x, curFPathData.vFPPassPntData[i].y)
                 cguPos2 = CguPos(curFPathData.vFPPassPntData[i+1].x, curFPathData.vFPPassPntData[i+1].y)
-                dTotalDis += MathUtilityTool.Distance(cguPos1, cguPos2)
+                dTotalDis += MathUtilityTool.distance(cguPos1, cguPos2)
 
         if eActionType == ENUM_QACTION_TYPE.E_ACTION_SLOWDOWN:
             dDis = (dTotalDis-ConfigReader.dSafeDis)
@@ -161,8 +181,8 @@ class UtilityTool(object):
             dSpd = dDis/iTime
             ##减速每段增加时间
             iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
-            print ('Q学习中减速动作速度小于最小阈值={0} m/s'.format(ConfigReader.dSlowMinSpd))
             if dSpd < ConfigReader.dSlowMinSpd:
+                print('warning:Q学习中减速动作速度小于最小阈值={0} m/s'.format(ConfigReader.dSlowMinSpd))
                 return None
             else:
                 for i in range(len(curFPathData.vFPPassPntData)):

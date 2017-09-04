@@ -62,7 +62,7 @@ class LearnWorkState(ControllerWorkState):
 		self.pFlightMgr.addFutureFlightPlan(iTime)
 
 	def _pathSelect(self):
-		self.pPathSelect.selectPath()
+		return self.pPathSelect.selectPath()
 	def _updateFlightPlan(self, iTime):
 		self.pFlightMgr.updateFlightPlan(iTime)
 	##更新需要计算的飞行计划集合

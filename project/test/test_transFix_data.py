@@ -4,9 +4,12 @@ from project.public.dataObj import *
 from project.src.utility import UtilityTool
 from project.public.scenarioDataObj import *
 
+print ('数据转换添加1、时间2、固定点ID')
+
+
 class DataService(object):
     def __init__(self):
-        self.pMsSql = MSSQL('192.168.0.163', 'sa', '123456', 'ATCSIM_VIRTUAL')
+        self.pMsSql = MSSQL('10.9.8.199', 'sa', '123456', 'ATCSIM_VIRTUAL')
     def isConnectDB(self):
         if self.pMsSql.getConnect() == None:
             return False
@@ -77,3 +80,4 @@ for k in pathDataDic:
         vFixData[i+1].iRelaPassTime = vFixData[i].iRelaPassTime + iTIme
 
 pDataService.reFormatPathData(pathDataDic)
+print ('data trans finished')

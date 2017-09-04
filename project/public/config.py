@@ -66,6 +66,6 @@ class ConfigReader(BaseData):
 		ConfigReader.iResolveConfilictTime = cfg.getint('Para', 'iResolveConfilictTime')
 		ConfigReader.dNonePathFine = cfg.getfloat('Para', 'dNonePathFine')
 		ConfigReader.dNormalTaxSpd = cfg.getfloat('Para', 'dNormalTaxSpd')
-		ConfigReader.iAddFlgihtPlanTime = cfg.getint('Pata', 'iAddFlgihtPlanTime')
+		ConfigReader.iAddFlgihtPlanTime = cfg.getint('Para', 'iAddFlgihtPlanTime')
 
 		return True

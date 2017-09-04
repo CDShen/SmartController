@@ -137,8 +137,14 @@ class FlightPlanMgr(object):
     def judgeIsHasConflict(self):
         PntPassTimeDic = {}
         ##过节点时间小于则规定值则仍为有冲突
-        for k in self.FlightPlanDic:
+        ##如果为未来计划则不管
+        for k in self.curFlightPlanDic:
             pFlightPlan = self.FlightPlanDic.get(k)
+            eStatus = pFlightPlan.getFlightFPStatus()
+            if eStatus == ENUM_FP_STATUS.E_STATUS_FUTURE:
+                continue
+            elif eStatus == ENUM_FP_STATUS.E_STATUS_FIN:
+                print('Error:当前飞行计划集合中存在已经完成的计划')
             stFPPathData = pFlightPlan.getFlightPlanPath()
             for m in range(len(stFPPathData.vFPPassPntData)):
                 stPassFixData = stFPPathData.vFPPassPntData[m]
@@ -148,5 +154,5 @@ class FlightPlanMgr(object):
                     for i in range(len(PntPassTimeDic.get(stPassFixData.iFixID))):
                         iRealPassTime = PntPassTimeDic.get(stPassFixData.iFixID)[i]
                         if  fabs(stPassFixData.iRealPassTime - iRealPassTime) < ConfigReader.iResolveConfilictTime:
-                            print('仍然存在过点时间冲突，当前时间阈值{0}'.format(ConfigReader.iResolveConfilictTime))
+                            print('warning:仍然存在过点时间冲突，当前时间阈值{0}'.format(ConfigReader.iResolveConfilictTime))
                     PntPassTimeDic.get(stPassFixData.iFixID).append(stPassFixData.iRealPassTime)

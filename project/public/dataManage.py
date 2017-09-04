@@ -45,6 +45,11 @@ class DataManager(object):
             if vPathData[i].iUseNum > iUseMaxNum:
                 iUseMaxNum = vPathData[i].iUseNum
                 iPathIndex = i
+        if iPathIndex > len(vPathData)-1:
+            print ('出现异常，index大于容器个数')
+        elif iPathIndex == -1:
+            print('出现异常，查找不到该容器')
+
         return  vPathData[iPathIndex]
 
     def getFixPointByID(self, iFixPntID):
