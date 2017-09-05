@@ -12,7 +12,8 @@ class FlightPlan(object):
 		self.strStartPosName = strStartPosName
 		self.strEndPosName = strEndPosName
 		self.iWaitTime = 0
-
+		self.dCurSpd = 0.0
+		self.dCurPassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL
 	##设置等待时间，如果冲突发生在起点就需要修改起始时间
 	def setWaitTime(self, iTime):
 		self.iWaitTime = iTime
@@ -84,7 +85,16 @@ class FlightPlan(object):
 	def clearPath(self):
 		self.FPPathData = None
 
-	def getPosByTime(self, iTime):
+	def setCurSpd(self, dSpd):
+		self.dCurSpd = dSpd
+	def setCurPassPntType(self, ePassPntType):
+		self.dCurPassPntType = ePassPntType
+	def getCurSpd(self):
+		return self.dCurSpd
+	def getCurPassPntType(self):
+		return self.dCurPassPntType
+
+	def getPosIndexByTime(self, iTime):
 		cguPos = CguPos(0,0)
 		for i in range(len(self.FPPathData.vFPPassPntData)-1):
 			stFirstPassPntData = self.FPPathData.vFPPassPntData[i]
@@ -97,12 +107,14 @@ class FlightPlan(object):
 					dSpd = MathUtilityTool.distance(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
 				        CguPos(stNextPassPntData.x,stNextPassPntData.y))/(stNextPassPntData.iRealPassTime/stFirstPassPntData.iRealPassTime)
 
-				cguPos = MathUtilityTool.getPosBySpdTime(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
+				cguPos,dSpd = MathUtilityTool.getPosBySpdTime(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
 				        CguPos(stNextPassPntData.x,stNextPassPntData.y),iTime-stFirstPassPntData.iRealPassTime,dSpd , ePassPntType)
 
+				self.setCurSpd(dSpd)
+				self.setCurPassPntType(ePassPntType)
 				# elif ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
 				# 	print('停止等待')
 				# elif ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN:
 				# 	print ('减速通过')
 
-				return cguPos
+				return cguPos,i+1

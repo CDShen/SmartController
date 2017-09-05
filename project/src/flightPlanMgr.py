@@ -134,11 +134,17 @@ class FlightPlanMgr(object):
         return ActiveFightPlanLst
 
     ##判断经过学习后仍然后冲突
-    def judgeIsHasConflict(self):
+    def judgeIsHasConflict(self, bAll = False):
+
         PntPassTimeDic = {}
+        if bAll == True:
+            self.resetFlightPlanData()
+            FlightPlanDic = self.FlightPlanDic
+        else:
+            FlightPlanDic = self.curFlightPlanDic
         ##过节点时间小于则规定值则仍为有冲突
         ##如果为未来计划则不管
-        for k in self.curFlightPlanDic:
+        for k in self.FlightPlanDic:
             pFlightPlan = self.FlightPlanDic.get(k)
             eStatus = pFlightPlan.getFlightFPStatus()
             if eStatus == ENUM_FP_STATUS.E_STATUS_FUTURE:

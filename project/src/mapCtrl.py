@@ -16,11 +16,15 @@ from ..public.config import ConfigReader
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import datetime
+import random
 
 class MapCtrl(object):
 	def __init__(self, pFlightPlanMgr):
 		self.RoadDataDic = {}
 		self.pFlightPlanMgr = pFlightPlanMgr
+		self.callSignDic = {}
+		##b-蓝色 olive-暗黄色  m-品红  darkslategray-暗青色 orange-橘色 brown-褐色
+		self.colorLst = ['blue', 'olive', 'magenta', 'teal', 'brown', 'orange']
 	class FixPointData(BaseData):
 		_fields = ['iID', 'strName', 'dX', 'dY', 'eConflictType']
 
@@ -67,11 +71,39 @@ class MapCtrl(object):
 		if ActiveFlightPlanLst == None:
 			return
 
+		##更新选择颜色方案,首先删除这次没有和保留已有的
+		delLst = []
+		for k in self.callSignDic:
+			bFind = False
+			for i in range(len(ActiveFlightPlanLst)):
+				pFlightPlan = ActiveFlightPlanLst[i]
+				strCallsign = pFlightPlan.getCallsign()
+				if k == strCallsign:
+					bFind = True
+					break
+			if bFind == False:
+				delLst.append(k)
+		for k in range(len(delLst)):
+			del self.callSignDic[delLst[k]]
+
 		LineList = []
 		for i in range(len(ActiveFlightPlanLst)):
 			pFlightPlan = ActiveFlightPlanLst[i]
-			cguCurPos = pFlightPlan.getPosByTime(iTime)
 			strCallsign = pFlightPlan.getCallsign()
+			cguCurPos, iIndex = pFlightPlan.getPosIndexByTime(iTime)
+
+			##获得滑行线
+			FPPathData = pFlightPlan.getFlightPlanPath()
+			CguPosLst = []
+			CguPosLst.append(cguCurPos)
+			for i in range(iIndex,len(FPPathData.vFPPassPntData)):
+				stFirstData = FPPathData.vFPPassPntData[i]
+				cguPos = CguPos(stFirstData.x,stFirstData.y)
+				CguPosLst.append(cguPos)
+
+			self.showTaxData(ax1, CguPosLst,strCallsign)
+
+
 			eFlightType = pFlightPlan.getFlightType()
 			iStartTime = pFlightPlan.getFlightPlanStartTime()
 			StartTime = datetime.time(int(iStartTime/3600%24), int(iStartTime/60%60), int(iStartTime%60))
@@ -84,11 +116,22 @@ class MapCtrl(object):
 				strFlightType = 'DEP'
 			strLabel = strCallsign + ',' + strFlightType + ',' + strStartTime + ','+strStartPosName+'-->'+strEndPosName
 			if eFlightType == ENUM_FP_TYPE.E_FP_TYPE_ARR:
-				line, = ax1.plot(cguCurPos.x, cguCurPos.y, 'ro', label=strLabel, lw=1)
+				Objline, = ax1.plot(cguCurPos.x, cguCurPos.y, 'ro', label=strLabel, lw=1)
 			elif eFlightType == ENUM_FP_TYPE.E_FP_TYPE_DEP:
-				line, = ax1.plot(cguCurPos.x, cguCurPos.y, 'go', label=strLabel, lw=1)
-			ax1.text(cguCurPos.x, cguCurPos.y, strCallsign, family='serif', style='italic', ha='right', wrap=True)
-			LineList.append(line)
+				Objline, = ax1.plot(cguCurPos.x, cguCurPos.y, 'go', label=strLabel, lw=1)
+
+			eCurPassPntType = pFlightPlan.getCurPassPntType()
+			strPassPntType = ''
+			if eCurPassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL:
+				strPassPntType = 'NR'
+			if eCurPassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN:
+				strPassPntType = 'ST'
+			if eCurPassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
+				strPassPntType = 'PA'
+
+			strText = '{0} {1}km/h {2}'.format(strCallsign, int(pFlightPlan.getCurSpd()*3.6), strPassPntType)
+			ax1.text(cguCurPos.x, cguCurPos.y, strText, family='serif', style='italic', ha='right', wrap=True)
+			LineList.append(Objline)
 
 		ax1.legend(loc='upper right')
 
@@ -141,3 +184,37 @@ class MapCtrl(object):
 			ax1.plot(xLst, yLst, 'k-.', lw=1)
 			ax1.text(avgX, avgY, strRoadName, family='serif', style='italic', ha='right', wrap=True)
 
+	##iIndex 决定颜色
+	def showTaxData(self, ax, CugPosLst,callSign):
+		if self.callSignDic.get(callSign) != None:
+			color = self.callSignDic.get(callSign)
+		else:
+			delLst=[]
+			colorLst = copy.deepcopy(self.colorLst)
+			for i in range(len(colorLst)):
+				for k in self.callSignDic:
+					if colorLst[i] == self.callSignDic.get(k):
+						delLst.append(colorLst[i])
+			##去重
+			delLst = list(UtilityTool.cleardump(delLst))
+			for i in range(len(delLst)):
+				colorLst.remove(delLst[i])
+			if len(colorLst) == 0:
+				color = 'blue'
+			else:
+				k = random.randint(0, 1000) % len(colorLst)
+				color = colorLst[k]
+			self.callSignDic.setdefault(callSign, color)
+
+		ax1 = ax
+		xLst = []
+		yLst = []
+		for i in range(len(CugPosLst)):
+			stCugPos = CugPosLst[i]
+			xLst.append(stCugPos.x)
+			yLst.append(stCugPos.y)
+			##'y-':黄色直线
+			# plot(x, y, color='green', linestyle='dashed', marker='o',
+			#      markerfacecolor='blue', markersize=12).
+			# ax1.plot(xLst, yLst, '{0}-.'.format(colorLst[iOrder]), lw=1)
+			ax1.plot(xLst, yLst, color = color, linestyle = '-.',lw=1)

@@ -206,8 +206,8 @@ class TaxiMap(object):
 					iFirstTime = stPassPntData.iRelaPassTime + iStartTime
 					iFirstTimeNext = stNextPassPntData.iRelaPassTime + iStartTime
 					##冲突超过2个需要警告
-					if len(TmpNodeFlightPlanDataLst) > 1:
-						print ('warning:在相反节点中，存在潜在冲突对={0}'.format(len(TmpNodeFlightPlanDataLst)))
+					# if len(TmpNodeFlightPlanDataLst) > 1:
+					# 	print ('warning:在相反节点中，存在潜在冲突对={0}'.format(len(TmpNodeFlightPlanDataLst)))
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iSecondTime = TmpNodeFlightPlanDataLst[k][0].iRealPassTime
 						iSecondTimeNext = TmpNodeFlightPlanDataLst[k][1].iRealPassTime
@@ -253,8 +253,8 @@ class TaxiMap(object):
 								TmpNodeFlightPlanDataLst.append(TmpNodeFlightPlanDataPair)
 
 					##冲突超过2个需要警告
-					if len(TmpNodeFlightPlanDataLst) > 1:
-						print('warning:在不同节点中，存在潜在冲突对={0}'.format(len(TmpNodeFlightPlanDataLst)))
+					# if len(TmpNodeFlightPlanDataLst) > 1:
+					# 	print('warning:在不同节点中，存在潜在冲突对={0}'.format(len(TmpNodeFlightPlanDataLst)))
 					for k in range(len(TmpNodeFlightPlanDataLst)):
 						iPassTime = iStartTime + stNextPassPntData.iRelaPassTime
 						iSecondTime = TmpNodeFlightPlanDataLst[k][0].iRealPassTime

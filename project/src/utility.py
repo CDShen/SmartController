@@ -45,7 +45,7 @@ class MathUtilityTool(object):
         dis = iTime * dSpd
         cguData.x = CguPosS.x + dis*cguVec.x
         cguData.y = CguPosS.y + dis*cguVec.y
-
+        dCurSpd = dSpd
         if ePassTYPE == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
             cguStop = CguPos(0,0)
             cguStop.x = CguPosE.x - ConfigReader.dSafeDis * cguVec.x
@@ -55,15 +55,21 @@ class MathUtilityTool(object):
             ##反向
             if dFlag <= 0.0:
                 cguData = cguStop
+                dCurSpd = 0.0
 
-        return cguData
+        return cguData,dCurSpd
 
 class UtilityTool(object):
     dTheta = None
     pDataManager = None
-
-
-
+    ##队列去重
+    @classmethod
+    def cleardump(cls, items):
+        seen = set()
+        for item in items:
+            if item not in seen:
+                yield item
+                seen.add(item)
 
     # brief:解决冲突并返回冲突后的路径，只考虑改变冲突路线的方式
     # curFPPathData:[in] 当前计划滑行路线

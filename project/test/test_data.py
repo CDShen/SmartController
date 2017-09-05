@@ -21,11 +21,8 @@ class RoadData(BaseData):
 a = [1,2,3,[1,2],5]
 
 a.remove(1)
-b = {}
-a = []
-b.setdefault(1,4)
-b.setdefault(1,6)
-b.setdefault(2,1)
-b.setdefault(3,1)
 
-print (4/2.5)
+
+print (100%1)
+
+

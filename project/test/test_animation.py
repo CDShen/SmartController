@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib import pyplot as plt
+from matplotlib import animation
 
 
 #first set up the figure, the axis, and the plot element we want to animate
@@ -19,7 +20,7 @@ class A(object):
 		ax1.set_xlim(0, 200)
 		line, = ax1.plot([], [], 'o', label='good{0}'.format(iFrame), lw=1)
 		line1, = ax1.plot([], [], 'o', label='bad{0}'.format(iFrame), lw=1)
-
+		line2, = ax1.plot([], [], 'k-',lw=1)
 		ax1.legend(loc='upper right')
 		ax1.set_title('airport')
 		x = iFrame
@@ -30,9 +31,11 @@ class A(object):
 		ax1.text(x, y, str((1, 1)), family='serif', style='italic', ha='right', wrap=True)
 		ax1.text(x+5, y+5, str((2, 2)), family='serif', style='italic', ha='right', wrap=True)
 
+		line2.set_data([1,2,3,4,5],[1,2,3,4,5])
 		lineLst = []
 		lineLst.append(line)
 		lineLst.append(line1)
+		lineLst.append(line2)
 		return lineLst
 
 	def showData(self):
