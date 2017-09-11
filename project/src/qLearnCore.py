@@ -148,6 +148,7 @@ class QLearnFunction(LearnFunction):
 		QStateData = QLearnFunction.__transData2QState(pFlightPlan, PathData, pConFlightPlan, ConflictData)
 		QStateActionScoreDataLst = self._findQState(QStateData)
 		ScorePathDicLst = []
+		##注意，如果减速和停止都可以解决冲突的话优先选择减速~，因为条件不满足时候才使用停止
 		for i in range(len(QStateActionScoreDataLst)):
 			ScorePathDic = self._updateQValue(QStateActionScoreDataLst[i], PathData,pConFlightPlan, ConflictData)
 			ScorePathDicLst.append(ScorePathDic)

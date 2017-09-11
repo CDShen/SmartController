@@ -49,8 +49,7 @@ class LearnWorkState(ControllerWorkState):
 			##将当前滑行路径添加到滑行地图中
 			self.pFlightMgr.addCurPath2TaxMap()
 			pNextFlightPlan = self._getNextFlightPlan(iCurID)
-		##判断所有多个冲突
-		self.pFlightMgr.judgeIsHasConflict(True)
+
 	def getQStateActionData(self):
 		return self.pPathSelect.getQStateActionData()
 
@@ -68,7 +67,8 @@ class LearnWorkState(ControllerWorkState):
 	##更新需要计算的飞行计划集合
 	def _refreshFlightPlan(self):
 		self.pFlightMgr.refreshFlightPlan()
-
+	def LearnEpisodeMsg(self):
+		self.pFlightMgr.judgeIsHasConflict(True)
 
 
 

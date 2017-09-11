@@ -104,8 +104,9 @@ class FlightPlan(object):
 				dSpd = ConfigReader.dNormalTaxSpd
 				##如果是减速要重新计算减速度
 				if ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN:
-					dSpd = MathUtilityTool.distance(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
-				        CguPos(stNextPassPntData.x,stNextPassPntData.y))/(stNextPassPntData.iRealPassTime/stFirstPassPntData.iRealPassTime)
+					dDis = MathUtilityTool.distance(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
+				        CguPos(stNextPassPntData.x,stNextPassPntData.y))
+					dSpd = dDis / (stNextPassPntData.iRealPassTime-stFirstPassPntData.iRealPassTime)
 
 				cguPos,dSpd = MathUtilityTool.getPosBySpdTime(CguPos(stFirstPassPntData.x,stFirstPassPntData.y), \
 				        CguPos(stNextPassPntData.x,stNextPassPntData.y),iTime-stFirstPassPntData.iRealPassTime,dSpd , ePassPntType)

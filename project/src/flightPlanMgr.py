@@ -135,7 +135,7 @@ class FlightPlanMgr(object):
 
     ##判断经过学习后仍然后冲突
     def judgeIsHasConflict(self, bAll = False):
-
+        ##冲突统计
         PntPassTimeDic = {}
         if bAll == True:
             self.resetFlightPlanData()
@@ -162,3 +162,34 @@ class FlightPlanMgr(object):
                         if  fabs(stPassFixData.iRealPassTime - iRealPassTime) < ConfigReader.iResolveConfilictTime:
                             print('warning:仍然存在过点时间冲突，当前时间阈值{0}'.format(ConfigReader.iResolveConfilictTime))
                     PntPassTimeDic.get(stPassFixData.iFixID).append(stPassFixData.iRealPassTime)
+        ##动作统计 1、输出有减速或停止的，如果减速和停止有存在则报错
+        for k in self.FlightPlanDic:
+            pFlightPlan = self.FlightPlanDic.get(k)
+            stFPPathData = pFlightPlan.getFlightPlanPath()
+            #最后动作点序号
+            iLastAction = 0
+            ##记录减速和停止的
+            PassPntFlag = 0
+            for m in range(len(stFPPathData.vFPPassPntData)):
+                stPassFixData = stFPPathData.vFPPassPntData[m]
+
+                if stPassFixData.ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
+                    PassPntFlag |= ENUM_PASSPNT_TYPE.E_PASSPNT_STOP.value
+                    iLastAction = m
+                if stPassFixData.ePassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN:
+                    PassPntFlag |= ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN.value
+                    iLastAction = m
+
+                if PassPntFlag == (ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN.value | ENUM_PASSPNT_TYPE.E_PASSPNT_STOP.value):
+                    print('error:不可能出现减速和停止都存在的解决方式')
+
+            if PassPntFlag & ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN.value == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN.value or \
+                PassPntFlag & ENUM_PASSPNT_TYPE.E_PASSPNT_STOP.value == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP.value:
+                strCallSign = pFlightPlan.getCallsign()
+                stLastFixPnt = stFPPathData.vFPPassPntData[iLastAction]
+                strFixPntName = self.pDataManage.getFixPointByID(stLastFixPnt.iFixID).strName
+                if PassPntFlag & ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN.value == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN.value:
+                    strActrion = '减速'
+                if PassPntFlag & ENUM_PASSPNT_TYPE.E_PASSPNT_STOP.value == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP.value:
+                    strActrion = '停止'
+                print ('呼号{0}的冲突点为{1}，冲突解决动作为{2}'.format(strCallSign, strFixPntName ,strActrion))

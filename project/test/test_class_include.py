@@ -5,6 +5,8 @@ class A(object):
 		self.setVal(10)
 		print ('Start Work Flag={0}'.format(self.dData))
 
+
+
 	def setVal(self, dData):
 		self.dData = dData
 

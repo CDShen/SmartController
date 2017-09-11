@@ -123,11 +123,11 @@ class MapCtrl(object):
 			eCurPassPntType = pFlightPlan.getCurPassPntType()
 			strPassPntType = ''
 			if eCurPassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL:
-				strPassPntType = 'NR'
+				strPassPntType = 'N'
 			if eCurPassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN:
-				strPassPntType = 'ST'
+				strPassPntType = 'S'
 			if eCurPassPntType == ENUM_PASSPNT_TYPE.E_PASSPNT_STOP:
-				strPassPntType = 'PA'
+				strPassPntType = 'P'
 
 			strText = '{0} {1}km/h {2}'.format(strCallsign, int(pFlightPlan.getCurSpd()*3.6), strPassPntType)
 			ax1.text(cguCurPos.x, cguCurPos.y, strText, family='serif', style='italic', ha='right', wrap=True)

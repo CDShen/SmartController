@@ -105,8 +105,8 @@ class UtilityTool(object):
 
             if curFPathData.vFPPassPntData[i].iFixID == conFPPathData.vFPPassPntData[iSecondStartFixIDIndex-j].iFixID:
                 iFirstCommonStartIndex = i
-                j += 1
                 iSecCommonStartIndex = iSecondStartFixIDIndex-j
+                j += 1
             else:
                 break
 
@@ -186,17 +186,21 @@ class UtilityTool(object):
                     curFPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
             dSpd = dDis/iTime
             ##减速每段增加时间
+            ##iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
             iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
             if dSpd < ConfigReader.dSlowMinSpd:
-                print('warning:Q学习中减速动作速度小于最小阈值={0} m/s'.format(ConfigReader.dSlowMinSpd))
+                print('warning:Q学习中减速动作速度小于最小阈值={0} m/s，冲突位置序号={1}'.format(ConfigReader.dSlowMinSpd, iFirstCommonStartIndex+1))
                 return None
             else:
                 for i in range(len(curFPathData.vFPPassPntData)):
                     if i == 0:
                         newPath.vFPPassPntData.append(copy.deepcopy(curFPathData.vFPPassPntData[i]))
-                    if i <= iFirstCommonStartIndex and i>0:
+                    elif i <= iFirstCommonStartIndex and i>0:
+                        stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i-1])
                         stFPPassPntData = copy.deepcopy(curFPathData.vFPPassPntData[i])
-                        stFPPassPntData.iRealPassTime = stFPPassPntData.iRealPassTime + iSlowTime
+                        dRoadDis = MathUtilityTool.distance(CguPos(stFPPrePassPntData.x, stFPPrePassPntData.y), CguPos(stFPPassPntData.x, stFPPassPntData.y))
+                        dTime = dRoadDis/dSpd
+                        stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
                         stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN
                         newPath.vFPPassPntData.append(stFPPassPntData)
                     else:

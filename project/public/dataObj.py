@@ -85,8 +85,9 @@ class QStateActionScoreDataSet(BaseData):
 
 ##########Q动作枚举
 class ENUM_QACTION_TYPE(Enum):
-	E_ACTION_STOP = 1 ##停止
-	E_ACTION_SLOWDOWN = 2 ##减速
+	E_ACTION_SLOWDOWN = 1  ##减速
+	E_ACTION_STOP = 2 ##停止
+
 
 
 ##########Q状态

@@ -24,11 +24,12 @@ class SmartControllerAPP(object):
         pFlightPlanMgr = FlightPlanMgr(self.pDataManager)
         pFlightPlanMgr.createFlightPlan(iSeq)  ##根据CSV文件产生飞行计划
 
-
         if ConfigReader.iWorkState == 1:
             self.pWorkState = LearnWorkState(pFlightPlanMgr)
+        ##1,2暂时都一样，待修改
         elif ConfigReader.iWorkState == 2:
             ##其他工作模式
+            self.pWorkState = LearnWorkState(pFlightPlanMgr)
             pass
 
         ##公共转换中需要DataManager获取某些数据
@@ -56,9 +57,18 @@ class SmartControllerAPP(object):
         ##开始工作
         self.pWorkState.doWork()
 
+        ##输出学习结果
+        self.pWorkState.LearnEpisodeMsg()
 
-        if self._save() == False:
-            print ('存储数据失败')
+        ##如果是验证状态不保存，因为是经过大量样本训练，所以本次的影响可以不计入
+        bSave = True
+        if ConfigReader.iWorkState == 2:
+            bSave = False
+        if bSave == True:
+            if self._save() == False:
+                print('存储数据失败')
+        else:
+            print ('验证模式，不存储')
 
 
 

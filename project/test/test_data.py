@@ -17,12 +17,17 @@ class RoadData(BaseData):
 	_fields = ['name', 'vFixpnt']
 
 
+def updateQValue(i):
+	ScorePathDic = {'score': None, 'orgPath': None, 'FPPath':None, 'qscore':None}
+	ScorePathDic['score'] = i
+	ScorePathDic['orgPath'] = i
+	ScorePathDic['FPPath'] = i
+	ScorePathDic['qscore'] = i
+	return ScorePathDic
 
-a = [1,2,3,[1,2],5]
-
-a.remove(1)
-
-
-print (100%1)
+ScorePathDicLst = []
+for k in range(1,3):
+	ScorePathDicLst.append(updateQValue(k))
 
 
+print (ScorePathDicLst)
