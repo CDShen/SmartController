@@ -91,7 +91,7 @@ class UtilityTool(object):
                 iFirstStartIndex = i
                 break
 
-        for i in range(len(curFPathData.vFPPassPntData)):
+        for i in range(len(conFPPathData.vFPPassPntData)):
             if conFPPathData.vFPPassPntData[i].iFixID == iConFixID:
                 iSecondStartFixIDIndex = i
                 break
@@ -111,25 +111,65 @@ class UtilityTool(object):
                 break
 
         if iSecCommonStartIndex == 0:
-            print('Error:不会出现初始点冲突情况')
-        ##获得公共节点的过点时间
-        iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
-        iDiffTime = -1
-        for i in range(len(conFPPathData.vFPPassPntData)):
+            print('Error:内部冲突解决不会出现初始点冲突情况')
+        dTotalDis = 0.0
+        for i in range(len(curFPathData.vFPPassPntData)-1):
             if i < iSecCommonStartIndex:
-                newPath.vFPPassPntData.append(copy.deepcopy(conFPPathData.vFPPassPntData[i]))
-            elif i == iSecCommonStartIndex:
-                stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
-                iOrgTime = conFPPathData.vFPPassPntData[i].iRealPassTime
-                ##时间可能有问题，待修改
-                iNewTime = iCommonConPassPntTime + ConfigReader.iResolveConfilictTime
-                iDiffTime = iNewTime - iOrgTime
-                stFPPassPntData.iRealPassTime = iNewTime ##默认添加20s
-                newPath.vFPPassPntData.append(stFPPassPntData)
-            else:
-                stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
-                stFPPassPntData.iRealPassTime += iDiffTime
-                newPath.vFPPassPntData.append(stFPPassPntData)
+                cguPos1 = CguPos(conFPPathData.vFPPassPntData[i].x, conFPPathData.vFPPassPntData[i].y)
+                cguPos2 = CguPos(conFPPathData.vFPPassPntData[i+1].x, conFPPathData.vFPPassPntData[i+1].y)
+                dTotalDis += MathUtilityTool.distance(cguPos1, cguPos2)
+
+        dDis = (dTotalDis - ConfigReader.dSafeDis)
+        iTime = conFPPathData.vFPPassPntData[iSecCommonStartIndex].iRealPassTime - \
+                conFPPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
+        dSpd = dDis / iTime
+        ##减速每段增加时间
+        ##iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
+        iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
+        if dSpd < ConfigReader.dSlowMinSpd:
+            print ('内部冲突解决动作改为停止等待，呼号')
+            for i in range(len(conFPPathData.vFPPassPntData)):
+                if i < iSecCommonStartIndex:
+                    stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
+                    stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL
+                    newPath.vFPPassPntData.append(stFPPassPntData)
+                else:
+                    stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
+                    if i == iSecCommonStartIndex:
+                        stFPPassPntData.iRealPassTime = conFPPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime + 10.0
+                        stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_STOP
+                    elif i > iSecCommonStartIndex:
+                        stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i-1])
+                        dRoadDis = MathUtilityTool.distance(CguPos(stFPPrePassPntData.x, stFPPrePassPntData.y),
+                                                            CguPos(stFPPassPntData.x, stFPPassPntData.y))
+                        dTime = dRoadDis / ConfigReader.dNormalTaxSpd
+                        stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL
+                        stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
+                    newPath.vFPPassPntData.append(stFPPassPntData)
+        else:
+            for i in range(len(conFPPathData.vFPPassPntData)):
+                if i == 0:
+                    stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
+                    stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL
+                    newPath.vFPPassPntData.append(stFPPassPntData)
+                elif i <= iSecCommonStartIndex and i > 0:
+                    stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i - 1])
+                    stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
+                    dRoadDis = MathUtilityTool.distance(CguPos(stFPPrePassPntData.x, stFPPrePassPntData.y),
+                                                        CguPos(stFPPassPntData.x, stFPPassPntData.y))
+                    dTime = dRoadDis / dSpd
+                    stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
+                    stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN
+                    newPath.vFPPassPntData.append(stFPPassPntData)
+                else:
+                    stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i - 1])
+                    stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
+                    dRoadDis = MathUtilityTool.distance(CguPos(stFPPrePassPntData.x, stFPPrePassPntData.y),
+                                                        CguPos(stFPPassPntData.x, stFPPassPntData.y))
+                    dTime = dRoadDis / ConfigReader.dNormalTaxSpd
+                    stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
+                    stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL
+                    newPath.vFPPassPntData.append(stFPPassPntData)
         return newPath
 
     ##Q学习解决动作方式
@@ -204,10 +244,14 @@ class UtilityTool(object):
                         stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_SLOWDOWN
                         newPath.vFPPassPntData.append(stFPPassPntData)
                     else:
+                        stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i - 1])
                         stFPPassPntData = copy.deepcopy(curFPathData.vFPPassPntData[i])
-                        stFPPassPntData.iRealPassTime = curFPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime
+                        dRoadDis = MathUtilityTool.distance(CguPos(stFPPrePassPntData.x, stFPPrePassPntData.y),
+                                                            CguPos(stFPPassPntData.x, stFPPassPntData.y))
+                        dTime = dRoadDis / ConfigReader.dNormalTaxSpd
+                        stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
+                        stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL
                         newPath.vFPPassPntData.append(stFPPassPntData)
-
 
         elif eActionType == ENUM_QACTION_TYPE.E_ACTION_STOP:
             for i in range(len(curFPathData.vFPPassPntData)):
@@ -215,11 +259,16 @@ class UtilityTool(object):
                     newPath.vFPPassPntData.append(copy.deepcopy(curFPathData.vFPPassPntData[i]))
                 else:
                     stFPPassPntData = copy.deepcopy(curFPathData.vFPPassPntData[i])
-                    stFPPassPntData.iRealPassTime = curFPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime
                     if i == iFirstCommonStartIndex:
+                        stFPPassPntData.iRealPassTime = curFPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime + 10.0
                         stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_STOP
+                    elif i > iFirstCommonStartIndex:
+                        stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i - 1])
+                        dRoadDis = MathUtilityTool.distance(CguPos(stFPPrePassPntData.x, stFPPrePassPntData.y),
+                                                            CguPos(stFPPassPntData.x, stFPPassPntData.y))
+                        dTime = dRoadDis / ConfigReader.dNormalTaxSpd
+                        stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
                     newPath.vFPPassPntData.append(stFPPassPntData)
-
         return newPath
 
     ##是否最初冲突时在起点

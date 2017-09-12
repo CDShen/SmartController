@@ -32,9 +32,7 @@ class PathSelect(object):
         #判断该路径是否有冲突，如果有冲突用Q学习产生并更新Q数据
         ScorePathLst = []
         for i in range(len(vPathData)):
-            bNeedAddTime, ScorePathDic = self._pathScore(vPathData[i])
-            if bNeedAddTime == True:
-                return bNeedAddTime
+            ScorePathDic = self._pathScore(vPathData[i])
             ScorePathLst.append(ScorePathDic)
 
         ##路线排序,冒泡分数由大到小
@@ -70,12 +68,18 @@ class PathSelect(object):
         return  bNeedAddTime
     ##返回dict
     def _pathScore(self, PathData):
+        #test start
+        strCallsign = self.pFlightPlan.getCallsign()
+        if strCallsign == 'CBJ5698' or strCallsign == 'CSN3111':
+            x = 1
+            pass
+        #test end
+
         iStartTime = self.pFlightPlan.getFlightPlanStartTime()
         ScorePathDic = {'score': None, 'orgPath': None,'FPPath': None}
         dScore = 0.0
         orgPath = None
         FPPath = None
-        bNeedAddTime = False
         eResolveType, ConflictData  = self.pTaxiMap.calConflictType(self.pFlightPlan, PathData)
         if eResolveType == E_RESOLVE_TYPE.E_RESOLVE_NONE:
             dScore = UtilityTool.getTotalPathTaxiTime(PathData)
@@ -98,13 +102,11 @@ class PathSelect(object):
             ##dscore为一个综合值，并不只是解决冲突时间
             dScore, orgPath ,FPPath= self.pQLearnFunction.pathSelect(self.pFlightPlan, PathData, pConFlightPlan, ConflictData)
         ##如果是在起点有冲突需要加时间重新算
-        elif eResolveType == E_RESOLVE_TYPE.E_RESOLVE_ADDTIME:
-            bNeedAddTime = True
 
         ScorePathDic['score'] = dScore
         ScorePathDic['orgPath'] = orgPath
         ScorePathDic['FPPath'] = FPPath
-        return  bNeedAddTime, ScorePathDic
+        return  ScorePathDic
 
     def getQStateActionData(self):
         return self.pQLearnFunction.getQStateActionData()
