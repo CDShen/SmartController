@@ -170,7 +170,7 @@ class UtilityTool(object):
                     stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
                     stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL
                     newPath.vFPPassPntData.append(stFPPassPntData)
-        return newPath
+        return newPath, iSecCommonStartIndex
 
     ##Q学习解决动作方式
     @classmethod
@@ -230,7 +230,7 @@ class UtilityTool(object):
             iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
             if dSpd < ConfigReader.dSlowMinSpd:
                 print('warning:Q学习中减速动作速度小于最小阈值={0} m/s，冲突位置序号={1}'.format(ConfigReader.dSlowMinSpd, iFirstCommonStartIndex+1))
-                return None
+                return None, -1
             else:
                 for i in range(len(curFPathData.vFPPassPntData)):
                     if i == 0:
@@ -269,7 +269,9 @@ class UtilityTool(object):
                         dTime = dRoadDis / ConfigReader.dNormalTaxSpd
                         stFPPassPntData.iRealPassTime = stFPPrePassPntData.iRealPassTime + dTime
                     newPath.vFPPassPntData.append(stFPPassPntData)
-        return newPath
+
+
+        return newPath, iFirstCommonStartIndex
 
     ##是否最初冲突时在起点
     @classmethod

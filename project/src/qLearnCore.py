@@ -51,8 +51,10 @@ class QLearnFunction(LearnFunction):
 		curFPathData  = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 		iStartTime = self.pFlightPlan.getFlightPlanStartTime()
 		conFPPathData = pConFlightPlan.getFlightPlanPath()
+		iFirstConIndex = -1
 
-		FPPath = UtilityTool.resolveConflictByAction(curFPathData, conFPPathData, ConflictData, eActionType)
+		FPPath, iFirstConIndex = UtilityTool.resolveConflictByAction(curFPathData, conFPPathData, ConflictData, eActionType)
+
 
 
 		if FPPath == None:
@@ -64,7 +66,7 @@ class QLearnFunction(LearnFunction):
 			dReward = 1/dRatio
 			dScore  = iOrgTotalTime * dReward
 
-		return  dReward, FPPath, dScore
+		return  dReward, FPPath, dScore, iFirstConIndex
 	##brief 更新Q值并返回分数和路线
 	##warn:注意是否能通过引用方式更新值
 	def _updateQValue(self, QStateActionScoreData, PathData,pConFlightPlan, ConflictData):
@@ -74,7 +76,7 @@ class QLearnFunction(LearnFunction):
 		FPPath = None
 		QStateData = QStateActionScoreData.QStateData
 		eActionType = QStateActionScoreData.QActionData
-		dReward ,FPPath, score = self._reward(QStateData, eActionType, PathData, pConFlightPlan ,ConflictData)
+		dReward ,FPPath, score, iFirstConIndex = self._reward(QStateData, eActionType, PathData, pConFlightPlan ,ConflictData)
 
 		QStateActionScoreData.dScore = QStateActionScoreData.dScore *(1.0-self.dBeta) + self.dBeta*dReward
 		ScorePathDic['score'] = score
@@ -83,7 +85,7 @@ class QLearnFunction(LearnFunction):
 		ScorePathDic['qscore'] = QStateActionScoreData.dScore
 
 
-		return ScorePathDic
+		return ScorePathDic, iFirstConIndex
 
 	def _getQValue(self, state, action):
 		dScore=0.0
@@ -149,10 +151,21 @@ class QLearnFunction(LearnFunction):
 		QStateActionScoreDataLst = self._findQState(QStateData)
 		ScorePathDicLst = []
 		##注意，如果减速和停止都可以解决冲突的话优先选择减速~，因为条件不满足时候才使用停止
+		iFirstConIndex = -1
 		for i in range(len(QStateActionScoreDataLst)):
-			ScorePathDic = self._updateQValue(QStateActionScoreDataLst[i], PathData,pConFlightPlan, ConflictData)
+			ScorePathDic,iFirstConIndex = self._updateQValue(QStateActionScoreDataLst[i], PathData,pConFlightPlan, ConflictData)
 			ScorePathDicLst.append(ScorePathDic)
 
+		#输出日志
+		if iFirstConIndex >= 0:
+			strFixName = self.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID).strName
+			strCurCallsign = pFlightPlan.getCallsign()
+			strConCallsign = pConFlightPlan.getCallsign()
+			print('Q学习冲突呼号对[{0},{1}]，冲突点{2}'.format(strCurCallsign, strConCallsign, strFixName))
+		# strFixPntName = self.pDataManager.find
+		#    PathData.vPassPntData[iFirstConIndex]
+		# iFirstConIndex
+		# PathData iFirstConIndex
 
 		##路线排序,冒泡分数由大到小
 		for i in range(len(ScorePathDicLst) - 1):

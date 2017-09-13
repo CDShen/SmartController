@@ -18,6 +18,11 @@ from matplotlib import animation
 import datetime
 import random
 
+pause = False
+
+
+
+
 class MapCtrl(object):
 	def __init__(self, pFlightPlanMgr):
 		self.RoadDataDic = {}
@@ -25,8 +30,13 @@ class MapCtrl(object):
 		self.callSignDic = {}
 		##b-蓝色 olive-暗黄色  m-品红  darkslategray-暗青色 orange-橘色 brown-褐色
 		self.colorLst = ['blue', 'olive', 'magenta', 'teal', 'brown', 'orange']
+		self.iFrameCount = 0
 	class FixPointData(BaseData):
 		_fields = ['iID', 'strName', 'dX', 'dY', 'eConflictType']
+
+	def onClick(self, event):
+		global pause
+		pause ^= True
 
 	def setRoadData(self, stRoadData):
 		self.RoadDataDic = copy.deepcopy(stRoadData)
@@ -40,9 +50,15 @@ class MapCtrl(object):
 		# 		stFixData.dX = cguCovertPos.x
 		# 		stFixData.dY = cguCovertPos.y
 
+
+
 	def _resetFlightPlanData(self):
 		self.pFlightPlanMgr.resetFlightPlanData()
-	def animate(self, iFrame):
+	def animate(self, iFrameStep):
+		if not pause:
+			self.iFrameCount += 1
+
+		iFrame = self.iFrameCount
 		iTime = iFrame * ConfigReader.iStepCount
 		hour = int(iTime/3600%24)
 		min = int(iTime/60%60)
@@ -145,6 +161,7 @@ class MapCtrl(object):
 		fig = plt.figure()
 		xMin,xMax,yMin,yMax = self._getMaxMinLim()
 		fig.add_subplot(1, 1, 1, xlim=(xMin, xMax), ylim=(yMin, yMax))
+		fig.canvas.mpl_connect('button_press_event', self.onClick)
 		##animal没用也不能消除，这是一个对象
 		animal = animation.FuncAnimation(fig, self.animate, frames=3600, interval=1000)
 		plt.show()

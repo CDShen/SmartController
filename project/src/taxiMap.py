@@ -135,9 +135,16 @@ class TaxiMap(object):
 					return E_RESOLVE_TYPE.E_RESOLVE_NONE
 				else:
 					##调用公共函数解决冲突
-					newPath = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
+					newPath ,iSecCommonStartIndex = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
 					self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
 					self.newFPPathData = newPath
+					##打印日志
+					if iSecCommonStartIndex >= 0:
+						conPathData = pConFlightPlan.getFlightPlanPath()
+						strFixName = self.pDataManager.getFixPointByID(conPathData.vFPPassPntData[iSecCommonStartIndex].iFixID).strName
+						strCurCallsign = pFlightPlan.getCallsign()
+						strConCallsign = pConFlightPlan.getCallsign()
+						print('优先滑行时候冲突呼号对[{0},{1}]，冲突点{2}'.format(strCurCallsign, strConCallsign, strFixName))
 					return E_RESOLVE_TYPE.E_RESOLVE_INNER
 
 		##当前冲突类型和固定点冲突类型值一致
@@ -147,9 +154,16 @@ class TaxiMap(object):
 				return E_RESOLVE_TYPE.E_RESOLVE_NONE
 			else:
 				##调用公共函数解决冲突
-				newPath = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
+				newPath, iSecCommonStartIndex = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
 				self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
 				self.newFPPathData = newPath
+				#打印日志
+				if iSecCommonStartIndex >= 0:
+					conPathData = pConFlightPlan.getFlightPlanPath()
+					strFixName = self.pDataManager.getFixPointByID(conPathData.vFPPassPntData[iSecCommonStartIndex].iFixID).strName
+					strCurCallsign = pFlightPlan.getCallsign()
+					strConCallsign = pConFlightPlan.getCallsign()
+					print('优先滑行时候冲突呼号对[{0},{1}]，冲突点{2}'.format(strCurCallsign, strConCallsign, strFixName))
 				return E_RESOLVE_TYPE.E_RESOLVE_INNER
 
 		elif eCurFlightPlanType != eConFlightPlanType and eConFlightPlanType.value == eConFixType.value:
@@ -290,4 +304,4 @@ class TaxiMap(object):
 							return  self._judgeNeedQFunResolveCon(pFlightPlan, PathData,\
 							        pConFlightPlan,stConflictData), stConflictData
 		##end of for
-		return E_RESOLVE_TYPE.E_RESOLVE_NONE, None
+		return E_RESOLVE_TYPE.E_RESOLVE_NONE,None
