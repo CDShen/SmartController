@@ -10,7 +10,7 @@ taxiPathMap = {iNodeID:[NodeFlightPlanData]}
 from .utility import *
 from ..public.config import ConfigReader
 from ..public.dataObj import *
-
+from ..public.scenarioDataObj import *
 
 class NodeFlightPlanData(BaseData):
 	_fields = ['iFlightPlanID', 'iRealPassTime', 'iFixPntID']
@@ -26,6 +26,7 @@ class TaxiMap(object):
 		self.iResolveFligtPlanID = -1 ##内部可以解决冲突的飞行计划ID
 		self.newFPPathData = None   ##内部可以解决从图的飞行计划新滑行路径
 		self.initData()
+		self.ResolveData = None
 	##创建基础数据
 	def initData(self):
 		self.initMapData()
@@ -33,8 +34,9 @@ class TaxiMap(object):
 	def clearResolveFlightPlanData(self):
 		self.iResolveFligtPlanID = -1
 		self.newFPPathData = None
+		self.ResolveData = None
 	def getResolveFlightPlanData(self):
-		return  self.iResolveFligtPlanID, self.newFPPathData
+		return  self.iResolveFligtPlanID, self.newFPPathData, self.ResolveData
 
 	##brief 初始化基础地图数据
 	def initMapData(self):
@@ -123,52 +125,74 @@ class TaxiMap(object):
 		##将PathData数据转化为FPPathData
 		stFPPathData = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 
-		if eCurFlightPlanType == eConFlightPlanType or\
-			(eCurFlightPlanType != eConFlightPlanType and eConFixType == E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_FIFS):
+		##如果当前解决的冲突飞机已经有了解决冲突方案，则需要用Q函数解决
+		##如果已经解决了冲突就直接使用，当成一个pair看待
+		ConFlightPlanData = pConFlightPlan.getFlightPlanData()
+		if self.pFlightPlanMgr.judgeIsAlreadyResolved(ConFlightPlanData.iID):
+			return E_RESOLVE_TYPE.E_RESOLVE_QFUN
+		else:
+			if eCurFlightPlanType == eConFlightPlanType or\
+				(eCurFlightPlanType != eConFlightPlanType and eConFixType == E_FIXPOINT_CONF_TYPE.E_FIXPOINT_CONF_FIFS):
 
-			if iFirstPassTime > iSecondPassTime:
-				##需要Q函数处理
-				return E_RESOLVE_TYPE.E_RESOLVE_QFUN
-			else:
+				if iFirstPassTime > iSecondPassTime:
+					##需要Q函数处理
+					return E_RESOLVE_TYPE.E_RESOLVE_QFUN
+				else:
+					if bIsFuturePlan == True:
+						##不需要处理
+						return E_RESOLVE_TYPE.E_RESOLVE_NONE
+					else:
+						##调用公共函数解决冲突
+						newPath ,iSecCommonStartIndex = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
+						self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
+						self.newFPPathData = newPath
+						##打印日志
+						if iSecCommonStartIndex >= 0:
+							conPathData = pConFlightPlan.getFlightPlanPath()
+							# 初始冲突点名称
+							strCurPathID = ConflictData.iCurPathID
+							strConPathID = ConflictData.iConPathID
+							strFirstName = self.pDataManager.getFixPointByID(ConflictData.iConflictFixID).strName
+							strFixName = self.pDataManager.getFixPointByID(conPathData.vFPPassPntData[iSecCommonStartIndex].iFixID).strName
+							strCurCallsign = pFlightPlan.getCallsign()
+							strConCallsign = pConFlightPlan.getCallsign()
+							iCurFPID = pFlightPlan.getFlightPlanData().iID
+							iConFPID = pConFlightPlan.getFlightPlanData().iID
+							iSecondPassTime = newPath.vFPPassPntData[iSecCommonStartIndex].iRealPassTime
+							self.ResolveData = ResolveConflictData(iCurFPID, iConFPID, strCurPathID, strConPathID,iSecondPassTime, iSecondPassTime)
+							print('优先滑行时候冲突呼号对[{0},{1}]，冲突道路[{2},{3}]初始冲突点{4},冲突点{5}'.format(strCurCallsign, strConCallsign, strCurPathID, strConPathID,strFirstName,strFixName))
+						return E_RESOLVE_TYPE.E_RESOLVE_INNER
+
+			##当前冲突类型和固定点冲突类型值一致
+			elif eCurFlightPlanType != eConFlightPlanType and eCurFlightPlanType.value == eConFixType.value:
 				if bIsFuturePlan == True:
 					##不需要处理
 					return E_RESOLVE_TYPE.E_RESOLVE_NONE
 				else:
 					##调用公共函数解决冲突
-					newPath ,iSecCommonStartIndex = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
+					newPath, iSecCommonStartIndex = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
 					self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
 					self.newFPPathData = newPath
-					##打印日志
+					#打印日志
 					if iSecCommonStartIndex >= 0:
 						conPathData = pConFlightPlan.getFlightPlanPath()
+						# 初始冲突点名称
+						strCurPathID = ConflictData.iCurPathID
+						strConPathID = ConflictData.iConPathID
+						strFirstName = self.pDataManager.getFixPointByID(ConflictData.iConflictFixID).strName
 						strFixName = self.pDataManager.getFixPointByID(conPathData.vFPPassPntData[iSecCommonStartIndex].iFixID).strName
 						strCurCallsign = pFlightPlan.getCallsign()
 						strConCallsign = pConFlightPlan.getCallsign()
-						print('优先滑行时候冲突呼号对[{0},{1}]，冲突点{2}'.format(strCurCallsign, strConCallsign, strFixName))
+						iCurFPID = pFlightPlan.getFlightPlanData().iID
+						iConFPID = pConFlightPlan.getFlightPlanData().iID
+						iSecondPassTime = newPath.vFPPassPntData[iSecCommonStartIndex].iRealPassTime
+						self.ResolveData = ResolveConflictData(iCurFPID, iConFPID, strCurPathID, strConPathID, iSecondPassTime, iSecondPassTime)
+						print('优先滑行时候冲突呼号对[{0},{1}]，冲突道路[{2},{3}]初始冲突点{4},冲突点{5}'.format(strCurCallsign, strConCallsign, strCurPathID, strConPathID,strFirstName, strFixName))
 					return E_RESOLVE_TYPE.E_RESOLVE_INNER
 
-		##当前冲突类型和固定点冲突类型值一致
-		elif eCurFlightPlanType != eConFlightPlanType and eCurFlightPlanType.value == eConFixType.value:
-			if bIsFuturePlan == True:
-				##不需要处理
-				return E_RESOLVE_TYPE.E_RESOLVE_NONE
-			else:
-				##调用公共函数解决冲突
-				newPath, iSecCommonStartIndex = UtilityTool.resolveConflict(stFPPathData, pConFlightPlan.getFlightPlanPath(), ConflictData)
-				self.iResolveFligtPlanID = pConFlightPlan.getFlightPlanID()
-				self.newFPPathData = newPath
-				#打印日志
-				if iSecCommonStartIndex >= 0:
-					conPathData = pConFlightPlan.getFlightPlanPath()
-					strFixName = self.pDataManager.getFixPointByID(conPathData.vFPPassPntData[iSecCommonStartIndex].iFixID).strName
-					strCurCallsign = pFlightPlan.getCallsign()
-					strConCallsign = pConFlightPlan.getCallsign()
-					print('优先滑行时候冲突呼号对[{0},{1}]，冲突点{2}'.format(strCurCallsign, strConCallsign, strFixName))
-				return E_RESOLVE_TYPE.E_RESOLVE_INNER
-
-		elif eCurFlightPlanType != eConFlightPlanType and eConFlightPlanType.value == eConFixType.value:
-			##需要Q函数处理
-			return E_RESOLVE_TYPE.E_RESOLVE_QFUN
+			elif eCurFlightPlanType != eConFlightPlanType and eConFlightPlanType.value == eConFixType.value:
+				##需要Q函数处理
+				return E_RESOLVE_TYPE.E_RESOLVE_QFUN
 
 
 

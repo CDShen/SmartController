@@ -4,6 +4,7 @@ from ..public.dataManage import DataManager
 from ..public.config import ConfigReader
 from ..public.baseDataDef import BaseData
 from ..public.dataObj import *
+from ..public.scenarioDataObj import *
 from .flightPlan import FlightPlan
 from enum import Enum
 
@@ -152,31 +153,43 @@ class QLearnFunction(LearnFunction):
 		ScorePathDicLst = []
 		##注意，如果减速和停止都可以解决冲突的话优先选择减速~，因为条件不满足时候才使用停止
 		iFirstConIndex = -1
+		AlreadyResoveDataLst = []
 		for i in range(len(QStateActionScoreDataLst)):
 			ScorePathDic,iFirstConIndex = self._updateQValue(QStateActionScoreDataLst[i], PathData,pConFlightPlan, ConflictData)
 			ScorePathDicLst.append(ScorePathDic)
 
-		#输出日志
-		if iFirstConIndex >= 0:
-			strFixName = self.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID).strName
-			strCurCallsign = pFlightPlan.getCallsign()
-			strConCallsign = pConFlightPlan.getCallsign()
-			print('Q学习冲突呼号对[{0},{1}]，冲突点{2}'.format(strCurCallsign, strConCallsign, strFixName))
-		# strFixPntName = self.pDataManager.find
-		#    PathData.vPassPntData[iFirstConIndex]
-		# iFirstConIndex
-		# PathData iFirstConIndex
-
+			#输出日志
+			if iFirstConIndex >= 0:
+				#初始冲突点名称
+				strCurPathID = ConflictData.iCurPathID
+				strConPathID = ConflictData.iConPathID
+				strFirstName = self.pDataManager.getFixPointByID(ConflictData.iConflictFixID).strName
+				strFixName = self.pDataManager.getFixPointByID(PathData.vPassPntData[iFirstConIndex].iFixID).strName
+				strCurCallsign = pFlightPlan.getCallsign()
+				strConCallsign = pConFlightPlan.getCallsign()
+				iCurFPID = pFlightPlan.getFlightPlanData().iID
+				iConFPID = pConFlightPlan.getFlightPlanData().iID
+				iFristPassTime = ScorePathDic.get('FPPath').vFPPassPntData[iFirstConIndex].iRealPassTime
+				AlreadyResoveData = ResolveConflictData(iCurFPID,iConFPID,strCurPathID, strConPathID, iFristPassTime,iFristPassTime )
+				AlreadyResoveDataLst.append(AlreadyResoveData)
+				print('Q学习冲突呼号对[{0},{1}]，路线对[{2},{3}]初始冲突点{4}冲突点{5}'.format(strCurCallsign, strConCallsign,strCurPathID,strConPathID,strFirstName, strFixName))
+			else:
+				AlreadyResoveDataLst.append(None)
 		##路线排序,冒泡分数由大到小
 		for i in range(len(ScorePathDicLst) - 1):
 			bOK = True
 			for j in range(0, len(ScorePathDicLst) - 1 - i):
 				item = ScorePathDicLst[j]
 				itemNext = ScorePathDicLst[j + 1]
+				itemAlready =AlreadyResoveDataLst[j]
+				itemAlreadyNext=AlreadyResoveDataLst[j+1]
 				if item.get('qscore') < itemNext.get('qscore'):
 					itemTmp = itemNext
+					itemAlreadyTmp = itemAlreadyNext
 					ScorePathDicLst[j + 1] = item
 					ScorePathDicLst[j] = itemTmp
+					AlreadyResoveDataLst[j + 1] = itemAlready
+					AlreadyResoveDataLst[j] = itemAlreadyTmp
 					bOK = False
 			if bOK:
 				break
@@ -184,7 +197,7 @@ class QLearnFunction(LearnFunction):
 		dMaxScore = ScorePathDicLst[0].get('score')
 		orgPath = ScorePathDicLst[0].get('orgPath')
 		dFPPath = ScorePathDicLst[0].get('FPPath')
-		return dMaxScore,orgPath,dFPPath
+		return dMaxScore,orgPath,dFPPath, AlreadyResoveDataLst[0]
 
 	def getQStateActionData(self):
 		return self.QStateActionScoreDataLst

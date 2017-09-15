@@ -13,6 +13,7 @@ class FlightPlanMgr(object):
         self.iCurFlanID = -1
         self.pTaxiMap = TaxiMap(self, pDataManager)
         self.pDataManage = pDataManager
+        self.ResolveConflictDataLst = []
     ##brief 创建飞行计划
     def createFlightPlan(self, iSeq):
         pFlightPlanLst = FlightPlanGen.geneFlightPlan(iSeq, self.pDataManage)
@@ -132,6 +133,38 @@ class FlightPlanMgr(object):
             else:
                 ActiveFightPlanLst.append(pFlightPlan)
         return ActiveFightPlanLst
+
+    def judgeIsAlreadyResolved(self, iFPID):
+        for i in range(len(self.ResolveConflictDataLst)):
+            ResolveConflictData = self.ResolveConflictDataLst[i]
+            if iFPID == ResolveConflictData.iCurFPID or iFPID == ResolveConflictData.iConFPID:
+                return True
+        return False
+
+    def addAlreadyResolved(self, ResolveConflictData):
+        for i in self.ResolveConflictDataLst:
+            if (i.iCurFPID == ResolveConflictData.iCurFPID and i.ConFPID == ResolveConflictData.iConFPID) or \
+                    (i.iCurFPID == ResolveConflictData.iConFPID and i.iConFPID == ResolveConflictData.iCurFPID):
+                print ('出现重复解决对')
+        self.ResolveConflictDataLst.append(ResolveConflictData)
+    def getIsAlreadyResolvedPathID(self, iFPID):
+        for i in range(len(self.ResolveConflictDataLst)):
+            ResolveConflictData = self.ResolveConflictDataLst[i]
+            if iFPID == ResolveConflictData.iCurFPID:
+                return ResolveConflictData.iCurPathID
+            elif iFPID == ResolveConflictData.iConFPID:
+                return ResolveConflictData.iConPathID
+        return -1
+
+    def refreshAlreadyResolved(self, iTime):
+        defLst = []
+        for i in range(len(self.ResolveConflictDataLst)):
+            ResolveConflictData = self.ResolveConflictDataLst[i]
+            if iTime >= ResolveConflictData.iFirstPassTime and iTime >= ResolveConflictData.iSecPassTime:
+                defLst.append(ResolveConflictData)
+        for i in defLst:
+            self.ResolveConflictDataLst.remove(i)
+
 
     ##判断经过学习后仍然后冲突
     def judgeIsHasConflict(self, bAll = False):

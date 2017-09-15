@@ -43,6 +43,8 @@ class LearnWorkState(ControllerWorkState):
 			##将此计划N分钟后的飞行计划(包括自己)加入集合和去除已经完成的飞行计划
 			self._addFutureFlightPlan(iTime + ConfigReader.iFutureTimeMin*60)
 			self._refreshFlightPlan()
+			##将已经解除冲突的释放出来
+			self.pFlightMgr.refreshAlreadyResolved(iTime)
 			##对合法路径进行打分、更新Q值后加入集合
 			self.pPathSelect.setCurFlightPlan(pNextFlightPlan)
 			self._pathSelect()

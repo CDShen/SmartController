@@ -109,6 +109,8 @@ class UtilityTool(object):
                 j += 1
             else:
                 break
+        ##由于存在容差，取冲突飞机的时间
+        iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
 
         if iSecCommonStartIndex == 0:
             print('Error:内部冲突解决不会出现初始点冲突情况')
@@ -120,13 +122,13 @@ class UtilityTool(object):
                 dTotalDis += MathUtilityTool.distance(cguPos1, cguPos2)
 
         dDis = (dTotalDis - ConfigReader.dSafeDis)
-        iTime = conFPPathData.vFPPassPntData[iSecCommonStartIndex].iRealPassTime - \
-                conFPPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
+        iTime = iCommonConPassPntTime - conFPPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
         dSpd = dDis / iTime
         ##减速每段增加时间
         ##iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
         iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
         if dSpd < ConfigReader.dSlowMinSpd:
+           # stFixPointData = UtilityTool.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID)
             print ('内部冲突解决动作改为停止等待，呼号')
             for i in range(len(conFPPathData.vFPPassPntData)):
                 if i < iSecCommonStartIndex:
@@ -136,7 +138,7 @@ class UtilityTool(object):
                 else:
                     stFPPassPntData = copy.deepcopy(conFPPathData.vFPPassPntData[i])
                     if i == iSecCommonStartIndex:
-                        stFPPassPntData.iRealPassTime = conFPPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime + 10.0
+                        stFPPassPntData.iRealPassTime = iCommonConPassPntTime + ConfigReader.iResolveConfilictTime + 10.0
                         stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_STOP
                     elif i > iSecCommonStartIndex:
                         stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i-1])
@@ -212,7 +214,8 @@ class UtilityTool(object):
             print ('Error:Q学习中不会出现初始点冲突情况')
         ##获得公共节点的过点时间
         dTotalDis = 0.0
-        iCommonConPassPntTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime
+        ##由于存在容差，取冲突飞机的时间
+        iCommonConPassPntTime = conFPPathData.vFPPassPntData[iSecCommonStartIndex].iRealPassTime
         iDiffTime = -1
         for i in range(len(curFPathData.vFPPassPntData)-1):
             if i < iFirstCommonStartIndex:
@@ -222,8 +225,7 @@ class UtilityTool(object):
 
         if eActionType == ENUM_QACTION_TYPE.E_ACTION_SLOWDOWN:
             dDis = (dTotalDis-ConfigReader.dSafeDis)
-            iTime = curFPathData.vFPPassPntData[iFirstCommonStartIndex].iRealPassTime - \
-                    curFPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
+            iTime = iCommonConPassPntTime - curFPathData.vFPPassPntData[0].iRealPassTime + ConfigReader.iResolveConfilictTime
             dSpd = dDis/iTime
             ##减速每段增加时间
             ##iSlowTime = ConfigReader.iResolveConfilictTime / iFirstCommonStartIndex
@@ -260,7 +262,7 @@ class UtilityTool(object):
                 else:
                     stFPPassPntData = copy.deepcopy(curFPathData.vFPPassPntData[i])
                     if i == iFirstCommonStartIndex:
-                        stFPPassPntData.iRealPassTime = curFPathData.vFPPassPntData[i].iRealPassTime + ConfigReader.iResolveConfilictTime + 10.0
+                        stFPPassPntData.iRealPassTime = iCommonConPassPntTime + ConfigReader.iResolveConfilictTime + 10.0
                         stFPPassPntData.ePassPntType = ENUM_PASSPNT_TYPE.E_PASSPNT_STOP
                     elif i > iFirstCommonStartIndex:
                         stFPPrePassPntData = copy.deepcopy(newPath.vFPPassPntData[i - 1])
@@ -326,10 +328,10 @@ class UtilityTool(object):
 
     ##如果在初始点发生冲突则需要等待
     @classmethod
-    def transPathData2FPPathData(self, iStartTime, PathData , iWaitTime = 0):
+    def transPathData2FPPathData(cls, iStartTime, PathData , iWaitTime = 0):
         vstFPPassPntData = []
         for i in range(len(PathData.vPassPntData)):
-            stFixPointData = self.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID)
+            stFixPointData = UtilityTool.pDataManager.getFixPointByID(PathData.vPassPntData[i].iFixID)
             stFPPassPntData = FPPassPntData(stFixPointData.iID,iStartTime + PathData.vPassPntData[i].iRelaPassTime,\
                             stFixPointData.dX, stFixPointData.dY,ENUM_PASSPNT_TYPE.E_PASSPNT_NORMAL)
             vstFPPassPntData.append(stFPPassPntData)

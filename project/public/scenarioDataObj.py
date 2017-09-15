@@ -101,8 +101,15 @@ class E_RESOLVE_TYPE(Enum):
 	E_RESOLVE_ADDTIME = 4 ##冲突发生在起始点需要后续航班延后
 
 
-
-
+##########已经解决的冲突对，在滑行时间过后解除冲突对
+#iCurFPID->当前飞行计划ID
+#iConFPID->冲突飞行计划ID
+#iCurPathID->当前路径ID
+#iConPathID->冲突路径iD
+#iFirstPassTime->第一个过公共点时间
+#iSecPassTime->第二个过公用点时间
+class ResolveConflictData(BaseData):
+	_fields = ['iCurFPID','iConFPID','iCurPathID', 'iConPathID', 'iFirstPassTime', 'iSecPassTime']
 
 
 

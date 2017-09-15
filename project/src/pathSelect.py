@@ -29,30 +29,54 @@ class PathSelect(object):
         iEndId = CurFlightPlanData.iEndPosID
         vPathData = self.pDataManage.getFlightPlanAllPath(iStartID, iEndId)
         bNeedAddTime = False
-        #判断该路径是否有冲突，如果有冲突用Q学习产生并更新Q数据
         ScorePathLst = []
-        for i in range(len(vPathData)):
-            ScorePathDic = self._pathScore(vPathData[i])
+        AddInfoLst = []
+        ##如果已经解决了冲突就直接使用，当成一个pair看待
+        if self.pFlightMgr.judgeIsAlreadyResolved(CurFlightPlanData.iID):
+            AddInfoDic = {'ResolveType': None, 'FPPath': None, 'FPID': None, 'ResolveData': None}
+            AddInfoLst.append(AddInfoDic)
+            iPathID = self.pFlightMgr.getIsAlreadyResolvedPathID(CurFlightPlanData.iID)
+            ScorePathDic = self._getAlreadyResolvePathSelect(vPathData, iPathID)
             ScorePathLst.append(ScorePathDic)
+        else:
+            #判断该路径是否有冲突，如果有冲突用Q学习产生并更新Q数据
+            for i in range(len(vPathData)):
+                ScorePathDic, AddInfoDic = self._pathScore(vPathData[i])
+                ScorePathLst.append(ScorePathDic)
+                AddInfoLst.append(AddInfoDic)
+            ##路线排序,冒泡分数由大到小
+            for i in range(len(ScorePathLst) - 1):
+                bOK = True
+                for j in range(0, len(ScorePathLst) - 1 - i):
+                    item = ScorePathLst[j]
+                    itemNext = ScorePathLst[j + 1]
+                    itemAdd = AddInfoLst[j]
+                    itemAddNext = AddInfoLst[j+1]
+                    if item.get('score') < itemNext.get('score'):
+                        itemTmp = itemNext
+                        itemAddTmp = itemAddNext
+                        ScorePathLst[j + 1] = item
+                        ScorePathLst[j] = itemTmp
+                        AddInfoLst[j+1] = itemAdd
+                        AddInfoLst[j] = itemAddTmp
 
-        ##路线排序,冒泡分数由大到小
-        for i in range(len(ScorePathLst) - 1):
-            bOK = True
-            for j in range(0, len(ScorePathLst) - 1 - i):
-                item = ScorePathLst[j]
-                itemNext = ScorePathLst[j + 1]
-                if item.get('score') < itemNext.get('score'):
-                    itemTmp = itemNext
-                    ScorePathLst[j + 1] = item
-                    ScorePathLst[j] = itemTmp
-                    bOK = False
-            if bOK:
-                break
+                        bOK = False
+                if bOK:
+                    break
 
 
         dMaxScore = ScorePathLst[0].get('score')
         bestProperFPPath = ScorePathLst[0].get('FPPath')
 
+        ##如果采用内部解决得最终确认后才使用
+        if AddInfoLst[0].get('ResolveType') == E_RESOLVE_TYPE.E_RESOLVE_INNER:
+            pConFlightPlan = self.pFlightMgr.getFlightPlanByID(AddInfoLst[0].get('FPID'))
+            pConFlightPlan.setBestProperPath(AddInfoLst[0].get('FPPath'))
+
+        ##将最大分数的解决方案放在集合中
+        stResolveData = AddInfoLst[0].get('ResolveData')
+        if AddInfoLst[0].get('ResolveType') == E_RESOLVE_TYPE.E_RESOLVE_INNER or AddInfoLst[0].get('ResolveType') == E_RESOLVE_TYPE.E_RESOLVE_QFUN:
+            self.pFlightMgr.addAlreadyResolved(stResolveData)
 
         if bestProperFPPath == None:
             print ('呼号={0}查找不到路线'.format(CurFlightPlanData.strName))
@@ -68,15 +92,11 @@ class PathSelect(object):
         return  bNeedAddTime
     ##返回dict
     def _pathScore(self, PathData):
-        #test start
-        strCallsign = self.pFlightPlan.getCallsign()
-        if strCallsign == 'CBJ5698' or strCallsign == 'CSN3111':
-            x = 1
-            pass
-        #test end
 
         iStartTime = self.pFlightPlan.getFlightPlanStartTime()
         ScorePathDic = {'score': None, 'orgPath': None,'FPPath': None}
+        ##返回附加信息在采用该路线时候使用
+        AddInfoDic = {'ResolveType': None, 'FPPath': None, 'FPID': None, 'ResolveData': None}
         dScore = 0.0
         orgPath = None
         FPPath = None
@@ -87,31 +107,58 @@ class PathSelect(object):
             FPPath = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
 
         elif eResolveType == E_RESOLVE_TYPE.E_RESOLVE_INNER:
-            ##其他飞机避让
-            iFlightPlanID, FPPathData =  self.pTaxiMap.getResolveFlightPlanData()
-            self.pFlightMgr.getFlightPlanByID(iFlightPlanID).setBestProperPath(FPPathData)
+            ##其他飞机避让,如果最终选的是这个方案才清空
+            iFlightPlanID, FPPathData, ResolveConflictData =  self.pTaxiMap.getResolveFlightPlanData()
             self.pTaxiMap.clearResolveFlightPlanData()
             dScore = UtilityTool.getTotalPathTaxiTime(PathData)
             orgPath = PathData
             FPPath = UtilityTool.transPathData2FPPathData(iStartTime, PathData)
+
+            AddInfoDic['ResolveType'] = eResolveType
+            AddInfoDic['FPPath'] = FPPathData
+            AddInfoDic['FPID'] = iFlightPlanID
+            AddInfoDic['ResolveData'] = ResolveConflictData
 
         elif eResolveType == E_RESOLVE_TYPE.E_RESOLVE_QFUN:
             ##交给Q函数处理
             self.pQLearnFunction.setCurFlightPlan(self.pFlightPlan)
             pConFlightPlan = self.pFlightMgr.getFlightPlanByID(ConflictData.iConfFPID)
             ##dscore为一个综合值，并不只是解决冲突时间
-            dScore, orgPath ,FPPath= self.pQLearnFunction.pathSelect(self.pFlightPlan, PathData, pConFlightPlan, ConflictData)
+            dScore, orgPath ,FPPath, ResolveConflictData= self.pQLearnFunction.pathSelect(self.pFlightPlan, PathData, pConFlightPlan, ConflictData)
+            AddInfoDic['ResolveType'] = eResolveType
+            AddInfoDic['ResolveData'] = ResolveConflictData
         ##如果是在起点有冲突需要加时间重新算
 
         ScorePathDic['score'] = dScore
         ScorePathDic['orgPath'] = orgPath
         ScorePathDic['FPPath'] = FPPath
-        return  ScorePathDic
+
+
+        return  ScorePathDic, AddInfoDic
 
     def getQStateActionData(self):
         return self.pQLearnFunction.getQStateActionData()
 
+    def _getAlreadyResolvePathSelect(self,vPathData, iPathID):
+        stPathData = None
+        for i in vPathData:
+            if i.iPathID == iPathID:
+                stPathData = i
+
+        iStartTime = self.pFlightPlan.getFlightPlanStartTime()
+        ScorePathDic = {'score': None, 'orgPath': None, 'FPPath': None}
+        dScore = 0.0
+        orgPath = None
+        FPPath = None
+
+        dScore = UtilityTool.getTotalPathTaxiTime(stPathData)
+        orgPath = stPathData
+        FPPath = UtilityTool.transPathData2FPPathData(iStartTime,stPathData)
 
 
+        ScorePathDic['score'] = dScore
+        ScorePathDic['orgPath'] = orgPath
+        ScorePathDic['FPPath'] = FPPath
+        return  ScorePathDic
 
 
